@@ -1007,6 +1007,91 @@
       animation: tr-flash 1.2s ease;
     }
 
+    .tr-persona-filter {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--tr-card);
+      border: 1px solid var(--tr-border);
+      border-radius: 10px;
+      font-size: 0.875rem;
+      color: #334155;
+    }
+
+    .tr-persona-filter label {
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .tr-persona-filter select {
+      font-family: inherit;
+      font-size: 0.875rem;
+      padding: 0.4rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--tr-border);
+      min-width: 220px;
+      background: #fff;
+      color: #0f172a;
+    }
+
+    .persona-fieldset {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem 1rem;
+      margin: 0 0 1rem;
+      background: var(--bg);
+    }
+
+    .persona-fieldset legend {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0 0.35rem;
+      color: var(--text);
+    }
+
+    .persona-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.45rem 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .persona-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.45rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .persona-item input {
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+    }
+
+    .persona-item label {
+      cursor: pointer;
+      font-weight: 400;
+      margin: 0;
+    }
+
+    .persona-summary {
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-bottom: 0.65rem;
+    }
+
+    .setup-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+    }
+
     @keyframes tr-flash {
       0%,
       100% {
@@ -1061,11 +1146,14 @@
               </div>
               <div class="field">
                 <label for="sow-file">Statement of Work (SOW)</label>
-                <input type="file" id="sow-file" name="sow" accept=".pdf,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required />
-                <p class="hint">Upload a <strong>PDF</strong> or <strong>DOCX</strong> file.</p>
+                <input type="file" id="sow-file" name="sow" accept=".pdf,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <p class="hint">Required for <strong>Load test with SOW</strong>. Skip if you use <strong>Load test with Prompt</strong> only.</p>
               </div>
               <p class="error-msg hidden" id="setup-error" role="alert"></p>
-              <button type="submit" class="btn-primary">Load test workspace</button>
+              <div class="setup-actions">
+                <button type="button" class="btn-primary" id="btn-load-sow">Load test with SOW</button>
+                <button type="button" class="btn-secondary" id="btn-load-prompt">Load test with Prompt</button>
+              </div>
             </form>
           </section>
 
@@ -1077,12 +1165,70 @@
 
       <div id="panel-test" class="panel active" role="tabpanel" aria-labelledby="tab-test">
         <div class="accordion-item">
-          <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="acc-test-list" id="acc-btn-test-list">
+          <button type="button" class="accordion-trigger" aria-expanded="true" aria-controls="acc-test-list" id="acc-btn-test-list">
             <span class="chevron" aria-hidden="true">▶</span>
             Generated test cases
           </button>
-          <div class="accordion-panel" id="acc-test-list" hidden>
-            <p class="hint" style="margin-top: 0">Cases derived from your SOW. Download the bundle or replace with an edited file.</p>
+          <div class="accordion-panel" id="acc-test-list">
+            <p class="hint" style="margin-top: 0" id="test-cases-intro">Select user personas below to define who the generated tests simulate. Download the bundle or upload a replacement file.</p>
+            <fieldset class="persona-fieldset" id="persona-fieldset">
+              <legend>User personas for test generation</legend>
+              <p class="persona-summary" id="persona-summary" aria-live="polite">Selected: All personas</p>
+              <div class="persona-grid" id="persona-grid">
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-all" name="persona" value="all" checked />
+                  <label for="persona-all">All Personas</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-cooperative" name="persona" value="cooperative" />
+                  <label for="persona-cooperative">Cooperative user</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-talkative" name="persona" value="talkative" />
+                  <label for="persona-talkative">Talkative user</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-angry" name="persona" value="angry" />
+                  <label for="persona-angry">Angry user</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-distrustful" name="persona" value="distrustful" />
+                  <label for="persona-distrustful">Distrustful user</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-evasive" name="persona" value="evasive" />
+                  <label for="persona-evasive">Evasive user</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-confused" name="persona" value="confused" />
+                  <label for="persona-confused">Confused user</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-low_financial_literacy" name="persona" value="low_financial_literacy" />
+                  <label for="persona-low_financial_literacy">Low financial literacy user</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-elderly" name="persona" value="elderly" />
+                  <label for="persona-elderly">Elderly user</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-non_native_speaker" name="persona" value="non_native_speaker" />
+                  <label for="persona-non_native_speaker">Non-native speaker</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-third_party_answerer" name="persona" value="third_party_answerer" />
+                  <label for="persona-third_party_answerer">Third party answerer</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-distracted" name="persona" value="distracted" />
+                  <label for="persona-distracted">Distracted user</label>
+                </div>
+                <div class="persona-item">
+                  <input type="checkbox" id="persona-rushed" name="persona" value="rushed" />
+                  <label for="persona-rushed">Rushed user</label>
+                </div>
+              </div>
+            </fieldset>
             <ul class="test-list" id="test-case-list"></ul>
             <div class="row" style="margin-top: 0.75rem">
               <button type="button" class="btn-secondary btn-small" id="btn-download-tests">Download test cases (.json)</button>
@@ -1100,7 +1246,7 @@
             Conversation flow chart
           </button>
           <div class="accordion-panel" id="acc-flow" hidden>
-            <p class="hint" style="margin-top: 0">Possible paths the voice agent can take between intents and handoffs, aligned to your SOW.</p>
+            <p class="hint" style="margin-top: 0" id="flow-chart-intro">Possible paths the voice agent can take between intents and handoffs (aligned to your SOW or prompt configuration).</p>
             <div class="mermaid-wrap">
               <div id="flow-mermaid" class="mermaid"></div>
             </div>
@@ -1199,9 +1345,41 @@
       const LENGTH_OPTIMAL_MAX = 3500;
       const LENGTH_SEMI_MAX = 8000;
 
+      const PERSONA_IDS = [
+        "cooperative",
+        "talkative",
+        "angry",
+        "distrustful",
+        "evasive",
+        "confused",
+        "low_financial_literacy",
+        "elderly",
+        "non_native_speaker",
+        "third_party_answerer",
+        "distracted",
+        "rushed",
+      ];
+
+      const PERSONA_LABELS = {
+        all: "All Personas",
+        cooperative: "Cooperative user",
+        talkative: "Talkative user",
+        angry: "Angry user",
+        distrustful: "Distrustful user",
+        evasive: "Evasive user",
+        confused: "Confused user",
+        low_financial_literacy: "Low financial literacy user",
+        elderly: "Elderly user",
+        non_native_speaker: "Non-native speaker",
+        third_party_answerer: "Third party answerer",
+        distracted: "Distracted user",
+        rushed: "Rushed user",
+      };
+
       let state = {
         botIdentifier: "",
         sowName: "",
+        loadMode: "sow",
         testCases: [],
         prompt: "",
         flowMermaid: "",
@@ -1329,6 +1507,64 @@
         }
       }
 
+      function personaLabel(key) {
+        return PERSONA_LABELS[key] || key;
+      }
+
+      function syncPersonaSummary() {
+        const sumEl = el("persona-summary");
+        if (!sumEl) return;
+        if (el("persona-all").checked) {
+          sumEl.textContent = "Selected: All personas";
+          return;
+        }
+        const names = [];
+        PERSONA_IDS.forEach(function (id) {
+          const c = el("persona-" + id);
+          if (c && c.checked) names.push(personaLabel(id));
+        });
+        sumEl.textContent = names.length ? "Selected: " + names.join(", ") : "Selected: none — choose at least one persona or All Personas";
+      }
+
+      function bindPersonaCheckboxes() {
+        const allCb = el("persona-all");
+        if (!allCb) return;
+        function onIndividualsChanged() {
+          let n = 0;
+          PERSONA_IDS.forEach(function (id) {
+            if (el("persona-" + id) && el("persona-" + id).checked) n += 1;
+          });
+          if (n === 0) {
+            allCb.checked = true;
+          } else if (n === PERSONA_IDS.length) {
+            allCb.checked = true;
+            PERSONA_IDS.forEach(function (id) {
+              const c = el("persona-" + id);
+              if (c) c.checked = false;
+            });
+          }
+          syncPersonaSummary();
+        }
+        allCb.addEventListener("change", function () {
+          if (allCb.checked) {
+            PERSONA_IDS.forEach(function (id) {
+              const c = el("persona-" + id);
+              if (c) c.checked = false;
+            });
+          }
+          syncPersonaSummary();
+        });
+        PERSONA_IDS.forEach(function (id) {
+          const c = el("persona-" + id);
+          if (c) {
+            c.addEventListener("change", function () {
+              if (c.checked) allCb.checked = false;
+              onIndividualsChanged();
+            });
+          }
+        });
+      }
+
       function resetTestView() {
         el("setup-card").classList.remove("hidden");
         el("workspace").classList.add("hidden");
@@ -1341,12 +1577,26 @@
         el("prompt-text").textContent = "";
         el("prompt-validation").classList.add("hidden");
         el("prompt-validation").innerHTML = "";
+        if (el("persona-all")) {
+          el("persona-all").checked = true;
+          PERSONA_IDS.forEach(function (id) {
+            const c = el("persona-" + id);
+            if (c) c.checked = false;
+          });
+          syncPersonaSummary();
+        }
 
         document.querySelectorAll("#workspace .accordion-trigger").forEach(function (btn) {
           btn.setAttribute("aria-expanded", "false");
           const panel = el(btn.getAttribute("aria-controls"));
           if (panel) panel.hidden = true;
         });
+        const testListBtn = el("acc-btn-test-list");
+        const testListPanel = el("acc-test-list");
+        if (testListBtn && testListPanel) {
+          testListBtn.setAttribute("aria-expanded", "true");
+          testListPanel.hidden = false;
+        }
 
         el("tab-test").setAttribute("aria-selected", "true");
         el("tab-prompt").setAttribute("aria-selected", "false");
@@ -1393,6 +1643,47 @@
           "- Never invent policies, prices, or commitments not in the SOW.",
           "",
           "Tone: professional, helpful, concise.",
+        ].join("\n");
+      }
+
+      function mockDataFromPrompt(botIdentifier) {
+        state.sowName = "";
+        state.testCases = [
+          { id: "TC-001", title: "Greeting and capability — prompt-based run", channel: "voice" },
+          { id: "TC-002", title: "Task completion using system prompt only", channel: "chat" },
+          { id: "TC-003", title: "Escalation when user requests human", channel: "voice" },
+          { id: "TC-004", title: "Out-of-policy handling per prompt rules", channel: "chat" },
+          { id: "TC-005", title: "End-to-end scripted flow (prompt scope)", channel: "voice" },
+        ];
+        state.flowMermaid = [
+          "flowchart TD",
+          "  A([Start / User opens session]) --> B{Intent?}",
+          "  B -->|Greeting| C[Welcome + capability summary]",
+          "  B -->|Task| D[Execute from prompt rules]",
+          "  B -->|Unclear| E[Clarifying questions]",
+          "  D --> F{Success?}",
+          "  F -->|Yes| G[Confirm + next steps]",
+          "  F -->|No| H[Retry or offer escalation]",
+          "  H --> I{Escalate?}",
+          "  I -->|Yes| J[Handoff to human / ticket]",
+          "  I -->|No| D",
+          "  C --> K([End session])",
+          "  G --> K",
+          "  E --> B",
+          "  J --> K",
+        ].join("\n");
+
+        state.prompt = [
+          "You are Inya.ai voice/chat assistant for bot `" + botIdentifier + "`.",
+          "No SOW file was attached — ground behavior in this system prompt and your org’s policies.",
+          "Rules:",
+          "- Stay within the scope you define below; decline unknown commitments.",
+          "- Prefer short, clear turns on voice; slightly richer detail is OK on chat.",
+          "- Escalate to a human when the user asks or when confidence is low.",
+          "",
+          "Tone: professional, helpful, concise.",
+          "",
+          "[Edit this prompt to match production.]",
         ].join("\n");
       }
 
@@ -1541,22 +1832,12 @@
         return out;
       }
 
-      function mockRunTests() {
-        state.runCounter = (state.runCounter || 0) + 1;
-        const raw = [
-          { name: "Conversation Flow & Goal Completion", passed: 14, failed: 2, warnings: 2 },
-          { name: "Chat Channel Testing", passed: 8, failed: 1, warnings: 1 },
-          { name: "Tool Calling", passed: 10, failed: 2, warnings: 1 },
-          { name: "Language & Localization", passed: 12, failed: 3, warnings: 1 },
-          { name: "Prompt Management & Regression", passed: 11, failed: 2, warnings: 1 },
-          { name: "Post-Call Summarization Testing", passed: 8, failed: 1, warnings: 0 },
-          { name: "Token & Cost Governance", passed: 4, failed: 0, warnings: 0 },
-        ];
+      function finalizeSectionsFromRaw(rawRows) {
         let totalTests = 0;
         let passed = 0;
         let failed = 0;
         let warnings = 0;
-        const sections = raw.map(function (s, idx) {
+        const sections = rawRows.map(function (s, idx) {
           const total = s.passed + s.failed + s.warnings;
           totalTests += total;
           passed += s.passed;
@@ -1574,12 +1855,7 @@
           };
         });
         const passPct = totalTests ? Math.round((passed / totalTests) * 100) : 0;
-        const started = new Date();
-        state.runDashboard = {
-          runNumber: 46 + state.runCounter,
-          started: started,
-          startedLabel: started.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }),
-          model: "claude-sonnet-4",
+        return {
           sections: sections,
           totals: {
             totalTests: totalTests,
@@ -1589,20 +1865,105 @@
             passPct: passPct,
           },
         };
-        state.runResult = { pct: passPct };
+      }
+
+      function jiggleRawForPersona(personaKey, raw) {
+        if (personaKey === "all") {
+          return raw.map(function (r) {
+            return { name: r.name, passed: r.passed, failed: r.failed, warnings: r.warnings };
+          });
+        }
+        const base = 0.76 + (simpleHash(personaKey) % 17) / 100;
+        return raw.map(function (row) {
+          const total = row.passed + row.failed + row.warnings;
+          const h = simpleHash(personaKey + row.name);
+          const factor = Math.min(0.98, Math.max(0.65, base + ((h % 13) - 6) / 100));
+          let np = Math.max(0, Math.min(total, Math.round(row.passed * factor)));
+          let rest = total - np;
+          const denom = row.failed + row.warnings;
+          const fr = denom > 0 ? row.failed / denom : 0.55;
+          let nf = Math.round(rest * fr);
+          let nw = rest - nf;
+          if (nf < 0) nf = 0;
+          if (nw < 0) nw = 0;
+          if (np + nf + nw !== total) {
+            nw = total - np - nf;
+            if (nw < 0) {
+              nf = total - np;
+              nw = 0;
+            }
+          }
+          return { name: row.name, passed: np, failed: nf, warnings: nw };
+        });
+      }
+
+      const RAW_SCOPE_SECTIONS = [
+        { name: "Conversation Flow & Goal Completion", passed: 14, failed: 2, warnings: 2 },
+        { name: "Chat Channel Testing", passed: 8, failed: 1, warnings: 1 },
+        { name: "Tool Calling", passed: 10, failed: 2, warnings: 1 },
+        { name: "Language & Localization", passed: 12, failed: 3, warnings: 1 },
+        { name: "Prompt Management & Regression", passed: 11, failed: 2, warnings: 1 },
+        { name: "Post-Call Summarization Testing", passed: 8, failed: 1, warnings: 0 },
+        { name: "Token & Cost Governance", passed: 4, failed: 0, warnings: 0 },
+      ];
+
+      function mockRunTests() {
+        state.runCounter = (state.runCounter || 0) + 1;
+        const personaResults = {};
+        personaResults.all = finalizeSectionsFromRaw(jiggleRawForPersona("all", RAW_SCOPE_SECTIONS));
+        PERSONA_IDS.forEach(function (pid) {
+          const j = jiggleRawForPersona(pid, RAW_SCOPE_SECTIONS);
+          personaResults[pid] = finalizeSectionsFromRaw(j);
+        });
+        const started = new Date();
+        const agg = personaResults.all.totals;
+        state.runDashboard = {
+          runNumber: 46 + state.runCounter,
+          started: started,
+          startedLabel: started.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }),
+          model: "claude-sonnet-4",
+          personaResults: personaResults,
+          activePersonaFilter: "all",
+        };
+        state.runResult = { pct: agg.passPct };
         return state.runDashboard;
       }
 
-      function renderRunResults() {
+      function getActiveResultsView() {
         const d = state.runDashboard;
-        if (!d) return;
+        if (!d || !d.personaResults) return null;
+        let key = d.activePersonaFilter || "all";
+        if (!d.personaResults[key]) key = "all";
+        return { meta: d, view: d.personaResults[key], filterKey: key };
+      }
+
+      function renderRunResults() {
+        const ctx = getActiveResultsView();
+        if (!ctx) return;
+        const d = ctx.meta;
+        const dv = ctx.view;
         const box = el("run-results");
         box.classList.remove("hidden");
-        const T = d.totals.totalTests || 1;
-        const maxScale = Math.max(20, Math.max.apply(null, d.sections.map(function (s) { return s.total; })));
+        const T = dv.totals.totalTests || 1;
+        const maxScale = Math.max(20, Math.max.apply(null, dv.sections.map(function (s) { return s.total; })));
+
+        let filterOpts =
+          '<option value="all"' +
+          (ctx.filterKey === "all" ? " selected" : "") +
+          ">All Personas</option>";
+        PERSONA_IDS.forEach(function (pid) {
+          filterOpts +=
+            '<option value="' +
+            escapeHtml(pid) +
+            '"' +
+            (ctx.filterKey === pid ? " selected" : "") +
+            ">" +
+            escapeHtml(personaLabel(pid)) +
+            "</option>";
+        });
 
         let barsHtml = "";
-        d.sections.forEach(function (s) {
+        dv.sections.forEach(function (s) {
           barsHtml +=
             '<div class="tr-bar-row">' +
             '<div class="tr-bar-label">' +
@@ -1619,7 +1980,7 @@
         }
 
         let catsHtml = "";
-        d.sections.forEach(function (s, i) {
+        dv.sections.forEach(function (s, i) {
           const hasFail = s.failed > 0;
           const cls = "tr-cat" + (hasFail ? " tr-has-fail" : "");
           let body =
@@ -1691,18 +2052,24 @@
           '<button type="button" class="tr-btn-outline" data-tr-action="failures">View failures ↗</button>' +
           '<button type="button" class="tr-btn-outline" data-tr-action="export">Export ↗</button>' +
           "</div></div>" +
+          '<div class="tr-persona-filter">' +
+          "<label for=\"tr-persona-filter\">Persona</label>" +
+          '<select id="tr-persona-filter" aria-label="Filter results by persona">' +
+          filterOpts +
+          "</select>" +
+          "</div>" +
           '<div class="tr-stat-grid">' +
           '<div class="tr-stat-card"><div class="tr-stat-label">Total test cases</div><div class="tr-stat-value">' +
-          d.totals.totalTests +
+          dv.totals.totalTests +
           "</div></div>" +
           '<div class="tr-stat-card"><div class="tr-stat-label">Passed</div><div class="tr-stat-value pass">' +
-          d.totals.passed +
+          dv.totals.passed +
           "</div></div>" +
           '<div class="tr-stat-card"><div class="tr-stat-label">Failed</div><div class="tr-stat-value fail">' +
-          d.totals.failed +
+          dv.totals.failed +
           "</div></div>" +
           '<div class="tr-stat-card"><div class="tr-stat-label">Warnings</div><div class="tr-stat-value warn">' +
-          d.totals.warnings +
+          dv.totals.warnings +
           "</div></div></div>" +
           '<div class="tr-charts">' +
           '<div class="tr-chart-card">' +
@@ -1718,11 +2085,11 @@
           '<div class="tr-donut-wrap">' +
           '<div class="tr-donut">' +
           '<div class="tr-donut-ring" style="' +
-          trDonutStyle(d.totals.passed, d.totals.failed, d.totals.warnings, T) +
+          trDonutStyle(dv.totals.passed, dv.totals.failed, dv.totals.warnings, T) +
           '"></div>' +
           '<div class="tr-donut-hole"></div>' +
           '<div class="tr-donut-label"><strong>' +
-          d.totals.passPct +
+          dv.totals.passPct +
           '%</strong><br/>pass rate</div></div>' +
           '<div class="tr-legend">' +
           '<span><span class="tr-dot" style="background:#22c55e"></span>Passed</span>' +
@@ -1753,11 +2120,11 @@
             return;
           }
           if (action === "failures") {
-            const dash = state.runDashboard;
-            if (!dash) return;
+            const ctx = getActiveResultsView();
+            if (!ctx) return;
             let target = null;
-            for (let i = 0; i < dash.sections.length; i++) {
-              if (dash.sections[i].failed > 0 || dash.sections[i].warnings > 0) {
+            for (let i = 0; i < ctx.view.sections.length; i++) {
+              if (ctx.view.sections[i].failed > 0 || ctx.view.sections[i].warnings > 0) {
                 target = el("tr-cat-" + i);
                 break;
               }
@@ -1772,13 +2139,20 @@
             }
           }
         });
+        box.addEventListener("change", function (e) {
+          if (e.target && e.target.id === "tr-persona-filter") {
+            state.runDashboard.activePersonaFilter = e.target.value;
+            renderRunResults();
+          }
+        });
       }
 
       function mockValidatePrompt() {
         const uncovered = [];
         const lower = state.prompt.toLowerCase();
         if (!lower.includes("escalat")) uncovered.push("Escalation path (explicit handoff language)");
-        if (!lower.includes("scope")) uncovered.push("Scope boundaries vs out-of-scope handling");
+        if (state.loadMode === "sow" && !lower.includes("scope")) uncovered.push("Scope boundaries vs out-of-scope handling");
+        if (state.loadMode === "prompt" && !lower.includes("prompt") && !lower.includes("ground")) uncovered.push("Clear grounding / policy instructions for prompt-only runs");
         if (state.prompt.length > LENGTH_SEMI_MAX) uncovered.push("Length: prompt may exceed practical context — trim or summarize SOW injection");
         const valid = uncovered.length === 0;
         return { valid: valid, uncovered: uncovered };
@@ -1848,8 +2222,41 @@
         showView("history");
       });
 
-      el("setup-form").addEventListener("submit", function (e) {
-        e.preventDefault();
+      function wirePromptEditor() {
+        if (!promptInputBound) {
+          promptInputBound = true;
+          el("prompt-text").addEventListener("input", function () {
+            state.prompt = el("prompt-text").textContent;
+            updateLengthMeter();
+          });
+        }
+      }
+
+      function applyWorkspaceUI() {
+        el("prompt-text").textContent = state.prompt;
+        updateLengthMeter();
+        renderTestList();
+        const intro = el("test-cases-intro");
+        if (intro) {
+          intro.textContent =
+            state.loadMode === "sow"
+              ? "Select user personas below. Cases are derived from your SOW. Download the bundle or upload a replacement file."
+              : "Select user personas below. Cases use your prompt configuration (no SOW). Download the bundle or upload a replacement file.";
+        }
+        const flowIntro = el("flow-chart-intro");
+        if (flowIntro) {
+          flowIntro.textContent =
+            state.loadMode === "sow"
+              ? "Possible paths the voice agent can take between intents and handoffs, aligned to your SOW."
+              : "Possible paths the voice agent can take between intents and handoffs, aligned to your prompt.";
+        }
+        wirePromptEditor();
+        el("setup-card").classList.add("hidden");
+        el("workspace").classList.remove("hidden");
+        el("workspace").setAttribute("aria-hidden", "false");
+      }
+
+      el("btn-load-sow").addEventListener("click", function () {
         const err = el("setup-error");
         err.classList.add("hidden");
         const botCheck = validateBotIdentifier(el("bot-identifier").value);
@@ -1860,7 +2267,7 @@
         }
         const fileInput = el("sow-file");
         if (!fileInput.files || !fileInput.files[0]) {
-          err.textContent = "Please upload a SOW file (PDF or DOCX).";
+          err.textContent = "Load test with SOW requires a PDF or DOCX file.";
           err.classList.remove("hidden");
           return;
         }
@@ -1877,23 +2284,30 @@
         }
 
         state.botIdentifier = botCheck.value;
+        state.loadMode = "sow";
         state.sowName = f.name;
         mockDataFromSow(botCheck.value, f.name);
-        el("prompt-text").textContent = state.prompt;
-        updateLengthMeter();
-        renderTestList();
+        applyWorkspaceUI();
+      });
 
-        if (!promptInputBound) {
-          promptInputBound = true;
-          el("prompt-text").addEventListener("input", function () {
-            state.prompt = el("prompt-text").textContent;
-            updateLengthMeter();
-          });
+      el("setup-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+      });
+
+      el("btn-load-prompt").addEventListener("click", function () {
+        const err = el("setup-error");
+        err.classList.add("hidden");
+        const botCheck = validateBotIdentifier(el("bot-identifier").value);
+        if (!botCheck.ok) {
+          err.textContent = botCheck.message;
+          err.classList.remove("hidden");
+          return;
         }
 
-        el("setup-card").classList.add("hidden");
-        el("workspace").classList.remove("hidden");
-        el("workspace").setAttribute("aria-hidden", "false");
+        state.botIdentifier = botCheck.value;
+        state.loadMode = "prompt";
+        mockDataFromPrompt(botCheck.value);
+        applyWorkspaceUI();
       });
 
       el("history-form").addEventListener("submit", function (e) {
@@ -1940,6 +2354,8 @@
       });
 
       bindTestResultsActions();
+      bindPersonaCheckboxes();
+      syncPersonaSummary();
     })();
   </script>
 </body>
