@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inya.ai — Automated Test Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface-hover: #243044;
+      --border: #2d3a4f;
+      --text: #e8edf4;
+      --muted: #8b9cb3;
+      --accent: #3d8bfd;
+      --accent-dim: #2563c4;
+      --success: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --radius: 10px;
+      --font: "DM Sans", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      background: radial-gradient(ellipse 120% 80% at 50% -20%, #1e3a5f 0%, transparent 50%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+      align-items: stretch;
+    }
+
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.25rem 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-brand {
+      padding: 0 1rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0 0.65rem;
+    }
+
+    .nav-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-item:hover:not(:disabled) {
+      background: var(--surface-hover);
+    }
+
+    .nav-item.active {
+      background: rgba(61, 139, 253, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .nav-item-disabled {
+      cursor: not-allowed;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      user-select: none;
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+    }
+
+    .shell {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    .view.hidden {
+      display: none !important;
+    }
+
+    .history-table-wrap {
+      overflow-x: auto;
+      margin-top: 0.5rem;
+    }
+
+    table.history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .history-table th,
+    .history-table td {
+      padding: 0.65rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .history-table th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .history-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .pct-cell {
+      font-weight: 600;
+    }
+
+    .pct-cell.good {
+      color: var(--success);
+    }
+
+    .pct-cell.mid {
+      color: var(--warn);
+    }
+
+    .pct-cell.low {
+      color: var(--danger);
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 0.75rem;
+      }
+
+      .sidebar-brand {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding: 0 0.5rem 0 0;
+      }
+
+      .sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        flex: 1;
+        gap: 0.35rem;
+      }
+
+      .nav-item,
+      .nav-item-disabled {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+    }
+
+    header {
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.35rem;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .brand {
+      color: var(--accent);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 0 0 1rem;
+      font-weight: 600;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    input[type="file"] {
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+
+    input[type="text"]:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    button,
+    .btn {
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dim);
+    }
+
+    .btn-secondary {
+      background: var(--surface-hover);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: #2c3d54;
+    }
+
+    .btn-small {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+
+    .tab {
+      padding: 0.75rem 1.25rem;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+    }
+
+    .tab:hover {
+      color: var(--text);
+    }
+
+    .tab[aria-selected="true"] {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    /* Accordion */
+    .accordion-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .accordion-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: var(--surface);
+      border: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .accordion-trigger:hover {
+      background: var(--surface-hover);
+    }
+
+    .accordion-trigger .chevron {
+      display: inline-flex;
+      transition: transform 0.2s;
+      color: var(--muted);
+    }
+
+    .accordion-trigger[aria-expanded="true"] .chevron {
+      transform: rotate(90deg);
+    }
+
+    .accordion-panel {
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .accordion-panel[hidden] {
+      display: none;
+    }
+
+    .test-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .test-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    .test-list li:last-child {
+      border-bottom: none;
+    }
+
+    .mermaid-wrap {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+
+    .mermaid-wrap .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+
+    .results-summary {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--surface);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .pass-pct {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--success);
+    }
+
+    .pass-pct.low {
+      color: var(--warn);
+    }
+
+    .pass-pct.fail {
+      color: var(--danger);
+    }
+
+    .result-lists {
+      margin-top: 1rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    @media (min-width: 600px) {
+      .result-lists {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .result-block h4 {
+      margin: 0 0 0.5rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .result-block.passed h4 {
+      color: var(--success);
+    }
+
+    .result-block.failed h4 {
+      color: var(--danger);
+    }
+
+    .result-block ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.85rem;
+    }
+
+    .channel-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: var(--surface-hover);
+      color: var(--muted);
+      margin-left: 0.35rem;
+      vertical-align: middle;
+    }
+
+    .channel-badge.voice {
+      background: rgba(61, 139, 253, 0.2);
+      color: var(--accent);
+    }
+
+    .channel-badge.chat {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+    }
+
+    .prompt-preview {
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 280px;
+      overflow-y: auto;
+      padding: 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .length-meter {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .length-meter.optimal {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+
+    .length-meter.semi {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warn);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .length-meter.bad {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .validation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .validation-box.ok {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+
+    .validation-box.bad {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .validation-box strong {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .validation-box ul {
+      margin: 0.5rem 0 0;
+      padding-left: 1.2rem;
+    }
+
+    /* Test results dashboard (light cards on app dark bg) */
+    .test-results-dash {
+      margin-top: 1.5rem;
+      color: #1e293b;
+      --tr-pass: #22c55e;
+      --tr-fail: #ef4444;
+      --tr-warn: #f59e0b;
+      --tr-card: #ffffff;
+      --tr-border: #e2e8f0;
+      --tr-muted: #64748b;
+    }
+
+    .tr-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .tr-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: -0.02em;
+    }
+
+    .tr-meta {
+      font-size: 0.85rem;
+      color: var(--tr-muted);
+      margin-top: 0.25rem;
+    }
+
+    .tr-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tr-btn-outline {
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--tr-border);
+      background: transparent;
+      color: #334155;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .tr-btn-outline:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    .tr-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      .tr-stat-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .tr-stat-card {
+      background: var(--tr-card);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      border: 1px solid var(--tr-border);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    }
+
+    .tr-stat-label {
+      font-size: 0.75rem;
+      color: var(--tr-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.35rem;
+    }
+
+    .tr-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .tr-stat-value.pass {
+      color: var(--tr-pass);
+    }
+
+    .tr-stat-value.fail {
+      color: var(--tr-fail);
+    }
+
+    .tr-stat-value.warn {
+      color: var(--tr-warn);
+    }
+
+    .tr-charts {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (min-width: 900px) {
+      .tr-charts {
+        grid-template-columns: 1fr 280px;
+        align-items: stretch;
+      }
+    }
+
+    .tr-chart-card {
+      background: var(--tr-card);
+      border-radius: 12px;
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--tr-border);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    }
+
+    .tr-chart-card h3 {
+      margin: 0 0 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .tr-bars-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .tr-bar-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(120px, 1.2fr);
+      gap: 0.5rem 0.75rem;
+      align-items: center;
+      font-size: 0.72rem;
+    }
+
+    @media (max-width: 599px) {
+      .tr-bar-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tr-bar-label {
+      color: #475569;
+      line-height: 1.3;
+      font-weight: 500;
+    }
+
+    .tr-bar-track {
+      display: flex;
+      height: 14px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #f1f5f9;
+      min-width: 0;
+    }
+
+    .tr-bar-seg {
+      height: 100%;
+      min-width: 2px;
+    }
+
+    .tr-bar-seg.p {
+      background: var(--tr-pass);
+    }
+
+    .tr-bar-seg.f {
+      background: var(--tr-fail);
+    }
+
+    .tr-bar-seg.w {
+      background: var(--tr-warn);
+    }
+
+    .tr-axis {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--tr-muted);
+      margin-top: 0.35rem;
+      padding-left: 0;
+    }
+
+    .tr-donut-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+    }
+
+    .tr-donut {
+      position: relative;
+      width: 168px;
+      height: 168px;
+    }
+
+    .tr-donut-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+
+    .tr-donut-hole {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 58%;
+      height: 58%;
+      border-radius: 50%;
+      background: var(--tr-card);
+      box-shadow: inset 0 0 0 1px var(--tr-border);
+    }
+
+    .tr-donut-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-size: 0.8rem;
+      color: #334155;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .tr-donut-label strong {
+      display: block;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .tr-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem 1rem;
+      justify-content: center;
+      margin-top: 0.75rem;
+      font-size: 0.7rem;
+      color: var(--tr-muted);
+    }
+
+    .tr-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .tr-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .tr-categories {
+      background: var(--tr-card);
+      border-radius: 12px;
+      border: 1px solid var(--tr-border);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+    }
+
+    .tr-cat {
+      border-bottom: 1px solid var(--tr-border);
+    }
+
+    .tr-cat:last-child {
+      border-bottom: none;
+    }
+
+    .tr-cat > summary {
+      list-style: none;
+      cursor: pointer;
+      display: block;
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    .tr-cat > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .tr-cat-line1 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .tr-cat-line1-left {
+      display: flex;
+      align-items: baseline;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .tr-cat-line1-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .tr-cat-name {
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .tr-cat-frac {
+      font-size: 0.8rem;
+      color: var(--tr-muted);
+      white-space: nowrap;
+    }
+
+    .tr-cat-bar-inline {
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      background: #f1f5f9;
+      margin-top: 0.6rem;
+    }
+
+    .tr-cat-pct {
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-align: right;
+    }
+
+    .tr-cat-pct.good {
+      color: var(--tr-pass);
+    }
+
+    .tr-cat-pct.mid {
+      color: var(--tr-warn);
+    }
+
+    .tr-cat-pct.low {
+      color: #ea580c;
+    }
+
+    .tr-cat-chev {
+      color: var(--tr-muted);
+      font-size: 0.75rem;
+      transition: transform 0.2s;
+    }
+
+    .tr-cat[open] .tr-cat-chev {
+      transform: rotate(-180deg);
+    }
+
+    .tr-cat-body {
+      padding: 0 1rem 1rem 1rem;
+      font-size: 0.8rem;
+      color: var(--tr-muted);
+      border-top: 1px solid #f1f5f9;
+      background: #fafafa;
+    }
+
+    .tr-cat-body ul {
+      margin: 0.5rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    .tr-cat-body .channel-badge {
+      margin-left: 0.25rem;
+    }
+
+    .tr-cat.tr-has-fail > summary {
+      box-shadow: inset 3px 0 0 var(--tr-fail);
+    }
+
+    .test-results-dash .channel-badge {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    .test-results-dash .channel-badge.voice {
+      background: rgba(61, 139, 253, 0.2);
+      color: #1d4ed8;
+    }
+
+    .test-results-dash .channel-badge.chat {
+      background: rgba(34, 197, 94, 0.2);
+      color: #15803d;
+    }
+
+    .tr-jump-highlight {
+      animation: tr-flash 1.2s ease;
+    }
+
+    @keyframes tr-flash {
+      0%,
+      100% {
+        box-shadow: none;
+      }
+      30% {
+        box-shadow: inset 0 0 0 2px var(--accent);
+      }
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="sidebar-brand">Inya.ai</div>
+      <nav class="sidebar-nav" role="navigation">
+        <button type="button" class="nav-item active" id="nav-test" data-view="test">Test</button>
+        <button type="button" class="nav-item" id="nav-history" data-view="history">View Historical Results</button>
+        <span class="nav-item-disabled" title="Coming soon">Production Bots</span>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <div id="view-test" class="view">
+        <div class="shell">
+          <header>
+            <h1><span class="brand">Inya.ai</span> Automated Test Suite</h1>
+            <p>Voice and chat assistant — test cases, flows, and prompt validation from your SOW.</p>
+          </header>
+
+          <section class="card" id="setup-card" aria-labelledby="setup-heading">
+            <h2 id="setup-heading">Configuration</h2>
+            <form id="setup-form" novalidate>
+              <div class="field">
+                <label for="bot-identifier">Bot ID or bot name</label>
+                <input
+                  type="text"
+                  id="bot-identifier"
+                  name="botIdentifier"
+                  placeholder="e.g. inya-prod-7f3a or Customer Support Bot"
+                  autocomplete="off"
+                  required
+                />
+                <p class="hint">Enter your bot’s <strong>ID</strong> or a <strong>display name</strong> — use whichever identifies this bot for your team.</p>
+              </div>
+              <div class="field">
+                <label for="sow-file">Statement of Work (SOW)</label>
+                <input type="file" id="sow-file" name="sow" accept=".pdf,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required />
+                <p class="hint">Upload a <strong>PDF</strong> or <strong>DOCX</strong> file.</p>
+              </div>
+              <p class="error-msg hidden" id="setup-error" role="alert"></p>
+              <button type="submit" class="btn-primary">Load test workspace</button>
+            </form>
+          </section>
+
+          <section class="card hidden" id="workspace" aria-hidden="true">
+      <div class="tabs" role="tablist" aria-label="Test suite sections">
+        <button type="button" class="tab" role="tab" id="tab-test" aria-selected="true" aria-controls="panel-test">Test Cases</button>
+        <button type="button" class="tab" role="tab" id="tab-prompt" aria-selected="false" aria-controls="panel-prompt">Prompt</button>
+      </div>
+
+      <div id="panel-test" class="panel active" role="tabpanel" aria-labelledby="tab-test">
+        <div class="accordion-item">
+          <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="acc-test-list" id="acc-btn-test-list">
+            <span class="chevron" aria-hidden="true">▶</span>
+            Generated test cases
+          </button>
+          <div class="accordion-panel" id="acc-test-list" hidden>
+            <p class="hint" style="margin-top: 0">Cases derived from your SOW. Download the bundle or replace with an edited file.</p>
+            <ul class="test-list" id="test-case-list"></ul>
+            <div class="row" style="margin-top: 0.75rem">
+              <button type="button" class="btn-secondary btn-small" id="btn-download-tests">Download test cases (.json)</button>
+              <label class="btn-secondary btn-small" style="display: inline-block; cursor: pointer">
+                Upload new file
+                <input type="file" id="upload-tests" accept=".json,.csv,.txt" class="hidden" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="acc-flow" id="acc-btn-flow">
+            <span class="chevron" aria-hidden="true">▶</span>
+            Conversation flow chart
+          </button>
+          <div class="accordion-panel" id="acc-flow" hidden>
+            <p class="hint" style="margin-top: 0">Possible paths the voice agent can take between intents and handoffs, aligned to your SOW.</p>
+            <div class="mermaid-wrap">
+              <div id="flow-mermaid" class="mermaid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.25rem">
+          <button type="button" class="btn-primary" id="btn-run-tests">Run test cases and generate result</button>
+          <div id="run-results" class="hidden"></div>
+        </div>
+      </div>
+
+      <div id="panel-prompt" class="panel" role="tabpanel" aria-labelledby="tab-prompt" hidden>
+        <div class="accordion-item">
+          <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="acc-prompt" id="acc-btn-prompt">
+            <span class="chevron" aria-hidden="true">▶</span>
+            System / agent prompt
+          </button>
+          <div class="accordion-panel" id="acc-prompt" hidden>
+            <div class="prompt-preview" id="prompt-text" contenteditable="true" spellcheck="false" role="textbox" aria-label="Agent prompt"></div>
+            <div class="length-meter optimal" id="length-meter" style="margin-top: 1rem">
+              Length: <span id="length-value">0</span> characters — <span id="length-label">optimal</span>
+            </div>
+            <div class="row" style="margin-top: 1rem">
+              <button type="button" class="btn-primary btn-small" id="btn-validate-prompt">Validate prompt</button>
+            </div>
+            <div id="prompt-validation" class="validation-box hidden"></div>
+          </div>
+        </div>
+      </div>
+          </section>
+
+          <footer>
+            Connect this UI to your Inya.ai pipeline: SOW parsing, test generation, and prompt APIs replace the demo data below.
+          </footer>
+        </div>
+      </div>
+
+      <div id="view-history" class="view hidden">
+        <div class="shell">
+          <header>
+            <h1><span class="brand">Inya.ai</span> Historical test runs</h1>
+            <p>Past automated test results by bot ID or bot name.</p>
+          </header>
+
+          <section class="card" id="history-lookup-card" aria-labelledby="history-setup-heading">
+            <h2 id="history-setup-heading">Lookup bot</h2>
+            <form id="history-form" novalidate>
+              <div class="field">
+                <label for="history-bot-identifier">Bot ID or bot name</label>
+                <input
+                  type="text"
+                  id="history-bot-identifier"
+                  name="historyBot"
+                  placeholder="e.g. inya-prod-7f3a or Customer Support Bot"
+                  autocomplete="off"
+                  required
+                />
+                <p class="hint">Enter the same <strong>ID</strong> or <strong>name</strong> you use to identify the bot.</p>
+              </div>
+              <p class="error-msg hidden" id="history-error" role="alert"></p>
+              <button type="submit" class="btn-primary">Load historical results</button>
+            </form>
+          </section>
+
+          <section class="card hidden" id="history-results-section" aria-live="polite">
+            <h2 style="margin-top: 0">Runs for <span id="history-bot-label"></span></h2>
+            <div class="history-table-wrap">
+              <table class="history-table" id="history-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Run ID</th>
+                    <th scope="col">Started</th>
+                    <th scope="col">Pass %</th>
+                    <th scope="col">Passed</th>
+                    <th scope="col">Failed</th>
+                    <th scope="col">Duration</th>
+                  </tr>
+                </thead>
+                <tbody id="history-table-body"></tbody>
+              </table>
+            </div>
+            <p class="hint hidden" id="history-empty">No historical runs found for this bot (demo).</p>
+          </section>
+
+          <footer>
+            Historical data will come from your Inya.ai test-run API when connected.
+          </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const LENGTH_OPTIMAL_MAX = 3500;
+      const LENGTH_SEMI_MAX = 8000;
+
+      let state = {
+        botIdentifier: "",
+        sowName: "",
+        testCases: [],
+        prompt: "",
+        flowMermaid: "",
+        runResult: null,
+        runDashboard: null,
+        runCounter: 0,
+      };
+
+      let promptInputBound = false;
+
+      function el(id) {
+        return document.getElementById(id);
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function validateBotIdentifier(raw) {
+        const s = String(raw).trim();
+        if (!s) {
+          return { ok: false, message: "Enter a bot ID or bot name." };
+        }
+        if (s.length > 200) {
+          return { ok: false, message: "Use at most 200 characters." };
+        }
+        if (/[\n\r]/.test(s)) {
+          return { ok: false, message: "Remove line breaks from this field." };
+        }
+        if (/[<>]/.test(s)) {
+          return { ok: false, message: "Angle brackets are not allowed." };
+        }
+        return { ok: true, value: s };
+      }
+
+      function simpleHash(str) {
+        let h = 0;
+        for (let i = 0; i < str.length; i++) {
+          h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+        }
+        return Math.abs(h);
+      }
+
+      function safeFileSlug(name) {
+        const slug = String(name)
+          .trim()
+          .replace(/[^a-zA-Z0-9_-]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 80);
+        return slug || "bot";
+      }
+
+      function mockHistoricalRuns(botKey) {
+        const seed = simpleHash(botKey.toLowerCase());
+        const rows = [];
+        const n = 8;
+        for (let i = 0; i < n; i++) {
+          const passPct = 60 + ((seed + i * 17) % 41);
+          const total = 12 + ((seed + i) % 8);
+          const passed = Math.round((total * passPct) / 100);
+          const failed = Math.max(0, total - passed);
+          const t = Date.now() - (i + 1) * 86400000 * 3 - i * 3600000;
+          rows.push({
+            runId: "RUN-" + String(10000 + (seed % 9000) + i),
+            started: new Date(t).toISOString(),
+            passPct: passPct,
+            passed: passed,
+            failed: failed,
+            durationSec: 45 + ((seed + i * 13) % 380),
+          });
+        }
+        return rows;
+      }
+
+      function pctClass(pct) {
+        if (pct >= 80) return "good";
+        if (pct >= 50) return "mid";
+        return "low";
+      }
+
+      function renderHistoryRows(runs) {
+        const tbody = el("history-table-body");
+        tbody.innerHTML = "";
+        runs.forEach(function (r) {
+          const tr = document.createElement("tr");
+          const started = new Date(r.started);
+          const startedStr = isNaN(started.getTime()) ? "—" : started.toLocaleString();
+          const dur = r.durationSec >= 60 ? Math.floor(r.durationSec / 60) + "m " + (r.durationSec % 60) + "s" : r.durationSec + "s";
+          tr.innerHTML =
+            "<td>" +
+            escapeHtml(r.runId) +
+            "</td><td>" +
+            escapeHtml(startedStr) +
+            '</td><td class="pct-cell ' +
+            pctClass(r.passPct) +
+            '">' +
+            r.passPct +
+            "%</td><td>" +
+            r.passed +
+            "</td><td>" +
+            r.failed +
+            "</td><td>" +
+            escapeHtml(dur) +
+            "</td>";
+          tbody.appendChild(tr);
+        });
+      }
+
+      function showView(name) {
+        const isTest = name === "test";
+        const isHistory = name === "history";
+        el("view-test").classList.toggle("hidden", !isTest);
+        el("view-history").classList.toggle("hidden", !isHistory);
+        el("nav-test").classList.toggle("active", isTest);
+        el("nav-history").classList.toggle("active", isHistory);
+        if (isHistory) {
+          el("history-results-section").classList.add("hidden");
+          el("history-empty").classList.add("hidden");
+          el("history-bot-identifier").value = "";
+          el("history-error").classList.add("hidden");
+        }
+      }
+
+      function resetTestView() {
+        el("setup-card").classList.remove("hidden");
+        el("workspace").classList.add("hidden");
+        el("workspace").setAttribute("aria-hidden", "true");
+        el("bot-identifier").value = "";
+        el("sow-file").value = "";
+        el("setup-error").classList.add("hidden");
+        el("run-results").classList.add("hidden");
+        el("run-results").innerHTML = "";
+        el("prompt-text").textContent = "";
+        el("prompt-validation").classList.add("hidden");
+        el("prompt-validation").innerHTML = "";
+
+        document.querySelectorAll("#workspace .accordion-trigger").forEach(function (btn) {
+          btn.setAttribute("aria-expanded", "false");
+          const panel = el(btn.getAttribute("aria-controls"));
+          if (panel) panel.hidden = true;
+        });
+
+        el("tab-test").setAttribute("aria-selected", "true");
+        el("tab-prompt").setAttribute("aria-selected", "false");
+        el("panel-test").classList.add("active");
+        el("panel-prompt").classList.remove("active");
+        el("panel-test").hidden = false;
+        el("panel-prompt").hidden = true;
+      }
+
+      function mockDataFromSow(botIdentifier, fileName) {
+        const base = fileName.replace(/\.[^.]+$/, "") || "SOW";
+        state.testCases = [
+          { id: "TC-001", title: "Greeting and scope — " + base, channel: "voice" },
+          { id: "TC-002", title: "FAQ resolution within SOW topics", channel: "chat" },
+          { id: "TC-003", title: "Escalation when user requests human", channel: "voice" },
+          { id: "TC-004", title: "Out-of-scope redirect per policy", channel: "chat" },
+          { id: "TC-005", title: "End-to-end booking flow (if applicable)", channel: "voice" },
+        ];
+        state.flowMermaid = [
+          "flowchart TD",
+          "  A([Start / User opens session]) --> B{Intent?}",
+          "  B -->|Greeting| C[Welcome + capability summary]",
+          "  B -->|Task in SOW| D[Execute scripted flow]",
+          "  B -->|Unclear| E[Clarifying questions]",
+          "  D --> F{Success?}",
+          "  F -->|Yes| G[Confirm + next steps]",
+          "  F -->|No| H[Retry or offer escalation]",
+          "  H --> I{Escalate?}",
+          "  I -->|Yes| J[Handoff to human / ticket]",
+          "  I -->|No| D",
+          "  C --> K([End session])",
+          "  G --> K",
+          "  E --> B",
+          "  J --> K",
+        ].join("\n");
+
+        state.prompt = [
+          "You are Inya.ai voice/chat assistant for bot `" + botIdentifier + "`.",
+          "Ground all answers in the Statement of Work: \"" + base + "\".",
+          "Rules:",
+          "- Stay within defined scope; politely decline out-of-scope requests.",
+          "- Prefer short, clear turns on voice; slightly richer detail is OK on chat.",
+          "- Escalate to a human when the user asks or when confidence is low.",
+          "- Never invent policies, prices, or commitments not in the SOW.",
+          "",
+          "Tone: professional, helpful, concise.",
+        ].join("\n");
+      }
+
+      function updateLengthMeter() {
+        const len = state.prompt.length;
+        const meter = el("length-meter");
+        const valueEl = el("length-value");
+        const labelEl = el("length-label");
+        valueEl.textContent = len;
+        meter.classList.remove("optimal", "semi", "bad");
+        if (len <= LENGTH_OPTIMAL_MAX) {
+          meter.classList.add("optimal");
+          labelEl.textContent = "optimal";
+        } else if (len <= LENGTH_SEMI_MAX) {
+          meter.classList.add("semi");
+          labelEl.textContent = "semi-optimal";
+        } else {
+          meter.classList.add("bad");
+          labelEl.textContent = "not optimal";
+        }
+      }
+
+      function renderTestList() {
+        const ul = el("test-case-list");
+        ul.innerHTML = "";
+        state.testCases.forEach(function (tc) {
+          const li = document.createElement("li");
+          const span = document.createElement("span");
+          span.textContent = tc.id + " — " + tc.title;
+          const badge = document.createElement("span");
+          badge.className = "channel-badge " + (tc.channel === "voice" ? "voice" : "chat");
+          badge.textContent = tc.channel;
+          li.appendChild(span);
+          li.appendChild(badge);
+          ul.appendChild(li);
+        });
+      }
+
+      function renderFlowChart() {
+        const node = el("flow-mermaid");
+        node.removeAttribute("data-processed");
+        node.textContent = state.flowMermaid;
+        if (typeof mermaid !== "undefined") {
+          mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "strict", flowchart: { useMaxWidth: true } });
+          mermaid.run({ nodes: [node] });
+        }
+      }
+
+      function downloadTestCases() {
+        const blob = new Blob([JSON.stringify(state.testCases, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "inya-test-cases-" + safeFileSlug(state.botIdentifier) + ".json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function parseUploadedTests(file, callback) {
+        const reader = new FileReader();
+        reader.onload = function () {
+          try {
+            const text = reader.result;
+            let parsed;
+            if (file.name.endsWith(".json")) {
+              parsed = JSON.parse(text);
+            } else {
+              const lines = String(text).split(/\r?\n/).filter(Boolean);
+              parsed = lines.map(function (line, i) {
+                return { id: "TC-U-" + (i + 1), title: line, channel: i % 2 ? "chat" : "voice" };
+              });
+            }
+            if (Array.isArray(parsed)) {
+              state.testCases = parsed.map(function (item) {
+                return {
+                  id: item.id || "TC-X",
+                  title: item.title || String(item),
+                  channel: item.channel === "chat" || item.channel === "voice" ? item.channel : "chat",
+                };
+              });
+              callback(null);
+            } else {
+              callback(new Error("File must contain a JSON array of test cases."));
+            }
+          } catch (e) {
+            callback(e);
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function trStackedSegs(p, f, w) {
+        const t = p + f + w || 1;
+        return (
+          '<div class="tr-bar-seg p" style="width:' +
+          (100 * p) / t +
+          '%"></div><div class="tr-bar-seg f" style="width:' +
+          (100 * f) / t +
+          '%"></div><div class="tr-bar-seg w" style="width:' +
+          (100 * w) / t +
+          '%"></div>'
+        );
+      }
+
+      function trPctLabelClass(pct) {
+        if (pct >= 90) return "good";
+        if (pct >= 70) return "mid";
+        return "low";
+      }
+
+      function trDonutStyle(passed, failed, warnings, total) {
+        if (!total) return "background:#e2e8f0";
+        const a1 = (360 * passed) / total;
+        const a2 = (360 * (passed + failed)) / total;
+        return (
+          "background:conic-gradient(from -90deg,#22c55e 0deg " +
+          a1 +
+          "deg,#ef4444 " +
+          a1 +
+          "deg " +
+          a2 +
+          "deg,#f59e0b " +
+          a2 +
+          "deg 360deg)"
+        );
+      }
+
+      function mockSamplesForSection(s, idx) {
+        const out = [];
+        let n = 0;
+        for (let i = 0; i < s.failed; i++) {
+          n += 1;
+          out.push({
+            title: "Failed assertion #" + n + " — " + s.name.slice(0, 24),
+            channel: n % 2 ? "voice" : "chat",
+            kind: "fail",
+          });
+        }
+        for (let i = 0; i < s.warnings; i++) {
+          n += 1;
+          out.push({
+            title: "Warning threshold — " + s.name.slice(0, 20),
+            channel: i % 3 ? "chat" : "voice",
+            kind: "warn",
+          });
+        }
+        return out;
+      }
+
+      function mockRunTests() {
+        state.runCounter = (state.runCounter || 0) + 1;
+        const raw = [
+          { name: "Conversation Flow & Goal Completion", passed: 14, failed: 2, warnings: 2 },
+          { name: "Chat Channel Testing", passed: 8, failed: 1, warnings: 1 },
+          { name: "Tool Calling", passed: 10, failed: 2, warnings: 1 },
+          { name: "Language & Localization", passed: 12, failed: 3, warnings: 1 },
+          { name: "Prompt Management & Regression", passed: 11, failed: 2, warnings: 1 },
+          { name: "Post-Call Summarization Testing", passed: 8, failed: 1, warnings: 0 },
+          { name: "Token & Cost Governance", passed: 4, failed: 0, warnings: 0 },
+        ];
+        let totalTests = 0;
+        let passed = 0;
+        let failed = 0;
+        let warnings = 0;
+        const sections = raw.map(function (s, idx) {
+          const total = s.passed + s.failed + s.warnings;
+          totalTests += total;
+          passed += s.passed;
+          failed += s.failed;
+          warnings += s.warnings;
+          const pct = total ? Math.round((s.passed / total) * 100) : 0;
+          return {
+            name: s.name,
+            passed: s.passed,
+            failed: s.failed,
+            warnings: s.warnings,
+            total: total,
+            pct: pct,
+            samples: mockSamplesForSection(s, idx),
+          };
+        });
+        const passPct = totalTests ? Math.round((passed / totalTests) * 100) : 0;
+        const started = new Date();
+        state.runDashboard = {
+          runNumber: 46 + state.runCounter,
+          started: started,
+          startedLabel: started.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }),
+          model: "claude-sonnet-4",
+          sections: sections,
+          totals: {
+            totalTests: totalTests,
+            passed: passed,
+            failed: failed,
+            warnings: warnings,
+            passPct: passPct,
+          },
+        };
+        state.runResult = { pct: passPct };
+        return state.runDashboard;
+      }
+
+      function renderRunResults() {
+        const d = state.runDashboard;
+        if (!d) return;
+        const box = el("run-results");
+        box.classList.remove("hidden");
+        const T = d.totals.totalTests || 1;
+        const maxScale = Math.max(20, Math.max.apply(null, d.sections.map(function (s) { return s.total; })));
+
+        let barsHtml = "";
+        d.sections.forEach(function (s) {
+          barsHtml +=
+            '<div class="tr-bar-row">' +
+            '<div class="tr-bar-label">' +
+            escapeHtml(s.name) +
+            "</div>" +
+            '<div><div class="tr-bar-track">' +
+            trStackedSegs(s.passed, s.failed, s.warnings) +
+            "</div></div></div>";
+        });
+
+        let axisTicks = "";
+        for (let i = 0; i <= 4; i++) {
+          axisTicks += "<span>" + Math.round((maxScale * i) / 4) + "</span>";
+        }
+
+        let catsHtml = "";
+        d.sections.forEach(function (s, i) {
+          const hasFail = s.failed > 0;
+          const cls = "tr-cat" + (hasFail ? " tr-has-fail" : "");
+          let body =
+            "<p>All checks passed in this scope area.</p>";
+          if (s.samples.length) {
+            body = "<p>Items needing attention (demo):</p><ul>";
+            s.samples.forEach(function (x) {
+              body +=
+                "<li>" +
+                escapeHtml(x.title) +
+                ' <span class="channel-badge ' +
+                (x.channel === "voice" ? "voice" : "chat") +
+                '">' +
+                escapeHtml(x.channel) +
+                "</span> — " +
+                (x.kind === "fail" ? '<span style="color:#ef4444">failed</span>' : '<span style="color:#f59e0b">warning</span>') +
+                "</li>";
+            });
+            body += "</ul>";
+          }
+          catsHtml +=
+            "<details class=\"" +
+            cls +
+            '" id="tr-cat-' +
+            i +
+            '">' +
+            "<summary>" +
+            '<div class="tr-cat-line1">' +
+            '<div class="tr-cat-line1-left">' +
+            '<span class="tr-cat-name">' +
+            escapeHtml(s.name) +
+            "</span>" +
+            '<span class="tr-cat-frac">' +
+            s.passed +
+            "/" +
+            s.total +
+            " passed</span>" +
+            "</div>" +
+            '<div class="tr-cat-line1-right">' +
+            '<span class="tr-cat-pct ' +
+            trPctLabelClass(s.pct) +
+            '">' +
+            s.pct +
+            "%</span>" +
+            '<span class="tr-cat-chev" aria-hidden="true">▾</span>' +
+            "</div></div>" +
+            '<div class="tr-cat-bar-inline">' +
+            trStackedSegs(s.passed, s.failed, s.warnings) +
+            "</div>" +
+            "</summary>" +
+            '<div class="tr-cat-body">' +
+            body +
+            "</div></details>";
+        });
+
+        box.innerHTML =
+          '<div class="test-results-dash" id="tr-dash-root">' +
+          '<div class="tr-header">' +
+          "<div>" +
+          '<div class="tr-title">Inya.ai — test results</div>' +
+          '<div class="tr-meta">Run #' +
+          d.runNumber +
+          " · " +
+          escapeHtml(d.startedLabel) +
+          " · Model: " +
+          escapeHtml(d.model) +
+          "</div></div>" +
+          '<div class="tr-actions">' +
+          '<button type="button" class="tr-btn-outline" data-tr-action="failures">View failures ↗</button>' +
+          '<button type="button" class="tr-btn-outline" data-tr-action="export">Export ↗</button>' +
+          "</div></div>" +
+          '<div class="tr-stat-grid">' +
+          '<div class="tr-stat-card"><div class="tr-stat-label">Total test cases</div><div class="tr-stat-value">' +
+          d.totals.totalTests +
+          "</div></div>" +
+          '<div class="tr-stat-card"><div class="tr-stat-label">Passed</div><div class="tr-stat-value pass">' +
+          d.totals.passed +
+          "</div></div>" +
+          '<div class="tr-stat-card"><div class="tr-stat-label">Failed</div><div class="tr-stat-value fail">' +
+          d.totals.failed +
+          "</div></div>" +
+          '<div class="tr-stat-card"><div class="tr-stat-label">Warnings</div><div class="tr-stat-value warn">' +
+          d.totals.warnings +
+          "</div></div></div>" +
+          '<div class="tr-charts">' +
+          '<div class="tr-chart-card">' +
+          "<h3>Pass rate by section</h3>" +
+          '<div class="tr-bars-wrap">' +
+          barsHtml +
+          "</div>" +
+          '<div class="tr-axis">' +
+          axisTicks +
+          "</div></div>" +
+          '<div class="tr-chart-card">' +
+          "<h3>Overall pass rate</h3>" +
+          '<div class="tr-donut-wrap">' +
+          '<div class="tr-donut">' +
+          '<div class="tr-donut-ring" style="' +
+          trDonutStyle(d.totals.passed, d.totals.failed, d.totals.warnings, T) +
+          '"></div>' +
+          '<div class="tr-donut-hole"></div>' +
+          '<div class="tr-donut-label"><strong>' +
+          d.totals.passPct +
+          '%</strong><br/>pass rate</div></div>' +
+          '<div class="tr-legend">' +
+          '<span><span class="tr-dot" style="background:#22c55e"></span>Passed</span>' +
+          '<span><span class="tr-dot" style="background:#ef4444"></span>Failed</span>' +
+          '<span><span class="tr-dot" style="background:#f59e0b"></span>Warnings</span>' +
+          "</div></div></div></div>" +
+          '<div class="tr-categories" id="tr-categories">' +
+          catsHtml +
+          "</div></div>";
+      }
+
+      function bindTestResultsActions() {
+        const box = el("run-results");
+        if (box.dataset.bound) return;
+        box.dataset.bound = "1";
+        box.addEventListener("click", function (e) {
+          const btn = e.target.closest("[data-tr-action]");
+          if (!btn) return;
+          const action = btn.getAttribute("data-tr-action");
+          if (action === "export") {
+            if (!state.runDashboard) return;
+            const blob = new Blob([JSON.stringify(state.runDashboard, null, 2)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "inya-test-results-" + safeFileSlug(state.botIdentifier || "run") + ".json";
+            a.click();
+            URL.revokeObjectURL(a.href);
+            return;
+          }
+          if (action === "failures") {
+            const dash = state.runDashboard;
+            if (!dash) return;
+            let target = null;
+            for (let i = 0; i < dash.sections.length; i++) {
+              if (dash.sections[i].failed > 0 || dash.sections[i].warnings > 0) {
+                target = el("tr-cat-" + i);
+                break;
+              }
+            }
+            if (target) {
+              target.open = true;
+              target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+              target.classList.add("tr-jump-highlight");
+              setTimeout(function () {
+                target.classList.remove("tr-jump-highlight");
+              }, 1400);
+            }
+          }
+        });
+      }
+
+      function mockValidatePrompt() {
+        const uncovered = [];
+        const lower = state.prompt.toLowerCase();
+        if (!lower.includes("escalat")) uncovered.push("Escalation path (explicit handoff language)");
+        if (!lower.includes("scope")) uncovered.push("Scope boundaries vs out-of-scope handling");
+        if (state.prompt.length > LENGTH_SEMI_MAX) uncovered.push("Length: prompt may exceed practical context — trim or summarize SOW injection");
+        const valid = uncovered.length === 0;
+        return { valid: valid, uncovered: uncovered };
+      }
+
+      function renderPromptValidation(result) {
+        const container = el("prompt-validation");
+        container.hidden = false;
+        container.classList.remove("hidden");
+        if (result.valid) {
+          container.className = "validation-box ok";
+          container.innerHTML = "<strong>Validated</strong><p style=\"margin:0\">All sampled SOW use cases appear covered in the prompt (demo heuristic).</p>";
+        } else {
+          container.className = "validation-box bad";
+          container.innerHTML =
+            "<strong>Invalid — gaps vs SOW</strong><ul>" +
+            result.uncovered.map(function (u) {
+              return "<li>" + escapeHtml(u) + "</li>";
+            }).join("") +
+            "</ul>";
+        }
+      }
+
+      // Accordion
+      document.querySelectorAll(".accordion-trigger").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const expanded = btn.getAttribute("aria-expanded") === "true";
+          const panelId = btn.getAttribute("aria-controls");
+          const panel = el(panelId);
+          btn.setAttribute("aria-expanded", String(!expanded));
+          if (expanded) {
+            panel.hidden = true;
+          } else {
+            panel.hidden = false;
+            if (panelId === "acc-flow") {
+              setTimeout(renderFlowChart, 50);
+            }
+          }
+        });
+      });
+
+      // Tabs
+      el("tab-test").addEventListener("click", function () {
+        el("tab-test").setAttribute("aria-selected", "true");
+        el("tab-prompt").setAttribute("aria-selected", "false");
+        el("panel-test").classList.add("active");
+        el("panel-prompt").classList.remove("active");
+        el("panel-prompt").hidden = true;
+        el("panel-test").hidden = false;
+      });
+
+      el("tab-prompt").addEventListener("click", function () {
+        el("tab-prompt").setAttribute("aria-selected", "true");
+        el("tab-test").setAttribute("aria-selected", "false");
+        el("panel-prompt").classList.add("active");
+        el("panel-test").classList.remove("active");
+        el("panel-test").hidden = true;
+        el("panel-prompt").hidden = false;
+      });
+
+      el("nav-test").addEventListener("click", function () {
+        showView("test");
+        resetTestView();
+      });
+
+      el("nav-history").addEventListener("click", function () {
+        showView("history");
+      });
+
+      el("setup-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const err = el("setup-error");
+        err.classList.add("hidden");
+        const botCheck = validateBotIdentifier(el("bot-identifier").value);
+        if (!botCheck.ok) {
+          err.textContent = botCheck.message;
+          err.classList.remove("hidden");
+          return;
+        }
+        const fileInput = el("sow-file");
+        if (!fileInput.files || !fileInput.files[0]) {
+          err.textContent = "Please upload a SOW file (PDF or DOCX).";
+          err.classList.remove("hidden");
+          return;
+        }
+        const f = fileInput.files[0];
+        const okType =
+          /\.pdf$/i.test(f.name) ||
+          /\.docx$/i.test(f.name) ||
+          f.type === "application/pdf" ||
+          f.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        if (!okType) {
+          err.textContent = "Please upload a PDF or DOCX file.";
+          err.classList.remove("hidden");
+          return;
+        }
+
+        state.botIdentifier = botCheck.value;
+        state.sowName = f.name;
+        mockDataFromSow(botCheck.value, f.name);
+        el("prompt-text").textContent = state.prompt;
+        updateLengthMeter();
+        renderTestList();
+
+        if (!promptInputBound) {
+          promptInputBound = true;
+          el("prompt-text").addEventListener("input", function () {
+            state.prompt = el("prompt-text").textContent;
+            updateLengthMeter();
+          });
+        }
+
+        el("setup-card").classList.add("hidden");
+        el("workspace").classList.remove("hidden");
+        el("workspace").setAttribute("aria-hidden", "false");
+      });
+
+      el("history-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const err = el("history-error");
+        err.classList.add("hidden");
+        const botCheck = validateBotIdentifier(el("history-bot-identifier").value);
+        if (!botCheck.ok) {
+          err.textContent = botCheck.message;
+          err.classList.remove("hidden");
+          return;
+        }
+        el("history-bot-label").textContent = botCheck.value;
+        const runs = mockHistoricalRuns(botCheck.value);
+        renderHistoryRows(runs);
+        el("history-empty").classList.add("hidden");
+        el("history-results-section").classList.remove("hidden");
+      });
+
+      el("btn-download-tests").addEventListener("click", downloadTestCases);
+
+      el("upload-tests").addEventListener("change", function (e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        parseUploadedTests(file, function (err) {
+          if (err) {
+            alert("Could not parse file: " + err.message);
+            return;
+          }
+          renderTestList();
+        });
+        e.target.value = "";
+      });
+
+      el("btn-run-tests").addEventListener("click", function () {
+        mockRunTests();
+        renderRunResults();
+      });
+
+      el("btn-validate-prompt").addEventListener("click", function () {
+        state.prompt = el("prompt-text").textContent;
+        updateLengthMeter();
+        renderPromptValidation(mockValidatePrompt());
+      });
+
+      bindTestResultsActions();
+    })();
+  </script>
+</body>
+</html>
