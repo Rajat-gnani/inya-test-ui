@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --bg: #0f1419;
@@ -1102,6 +1103,934 @@
       }
     }
 
+    /* System Health dashboard */
+    .shell-health {
+      max-width: 1200px;
+    }
+
+    .sh-hero {
+      border-radius: var(--radius);
+      padding: 1.35rem 1.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+    }
+
+    .sh-hero--ok {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, var(--surface) 55%);
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
+    .sh-hero--warn {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, var(--surface) 55%);
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    .sh-hero--bad {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, var(--surface) 55%);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .sh-hero-kicker {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .sh-hero-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 0 0 0.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .sh-hero-sub {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .sh-hero-alerts {
+      margin: 0.75rem 0 0;
+      padding-left: 1.15rem;
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+
+    .sh-hero-alerts li {
+      margin-bottom: 0.35rem;
+    }
+
+    .sh-hero-alerts li.sh-hero-alert--error {
+      color: #fecaca;
+    }
+
+    .sh-hero-alerts li.sh-hero-alert--warn {
+      color: #fde68a;
+    }
+
+    .sh-sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .sh-comp-id-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .sh-comp-chart-toggle {
+      flex-shrink: 0;
+      width: 1.65rem;
+      height: 1.65rem;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--muted);
+      cursor: pointer;
+      line-height: 1;
+      font-size: 0.85rem;
+    }
+
+    .sh-comp-chart-toggle:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .sh-comp-chart-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .sh-incident-strip {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .sh-incident-strip--none {
+      border-color: rgba(34, 197, 94, 0.25);
+      background: rgba(34, 197, 94, 0.06);
+    }
+
+    .sh-incident-banner {
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    .sh-incident-banner h3 {
+      margin: 0 0 0.35rem;
+      font-size: 1rem;
+    }
+
+    .sh-feed {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0.5rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    .sh-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .sh-metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+
+    .sh-metric-card h3 {
+      margin: 0 0 0.35rem;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .sh-metric-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .sh-spark {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 48px;
+    }
+
+    .sh-spark span {
+      flex: 1;
+      min-width: 3px;
+      border-radius: 2px 2px 0 0;
+      background: rgba(61, 139, 253, 0.35);
+    }
+
+    .sh-spark span:nth-child(6n) {
+      background: rgba(61, 139, 253, 0.65);
+    }
+
+    .sh-section {
+      margin-bottom: 1.25rem;
+    }
+
+    .sh-section h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 0 0 0.65rem;
+      font-weight: 600;
+    }
+
+    .sh-comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .sh-comp-table th,
+    .sh-comp-table td {
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .sh-comp-table th {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .sh-comp-id {
+      font-family: ui-monospace, monospace;
+      color: var(--accent);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .sh-badge {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .sh-badge--ok {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--success);
+    }
+
+    .sh-badge--degraded {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warn);
+    }
+
+    .sh-badge--recovering {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+    }
+
+    .sh-badge--bad {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+    }
+
+    .sh-uptime-track {
+      display: flex;
+      gap: 1px;
+      min-width: 120px;
+      height: 22px;
+      align-items: flex-end;
+    }
+
+    .sh-day {
+      flex: 1;
+      min-width: 2px;
+      border-radius: 1px;
+      min-height: 4px;
+    }
+
+    .sh-day-ok {
+      background: rgba(34, 197, 94, 0.75);
+    }
+
+    .sh-day-warn {
+      background: rgba(245, 158, 11, 0.85);
+    }
+
+    .sh-day-bad {
+      background: rgba(239, 68, 68, 0.9);
+    }
+
+    .sh-data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .sh-data-table th,
+    .sh-data-table td {
+      padding: 0.6rem 0.65rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .sh-data-table th {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .sh-actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .sh-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+    }
+
+    .sh-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .sh-region-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .sh-region-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .sh-region-tab {
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .sh-region-tab[aria-selected="true"] {
+      background: rgba(61, 139, 253, 0.2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .sh-live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .sh-live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: sh-pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes sh-pulse-dot {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.35;
+      }
+    }
+
+    .sh-freshness {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .sh-lg-p50 {
+      width: 12px;
+      height: 3px;
+      background: #38bdf8;
+      border-radius: 1px;
+    }
+
+    .sh-lg-p95 {
+      width: 12px;
+      border-top: 2px dashed #a78bfa;
+    }
+
+    .sh-lg-p99 {
+      width: 12px;
+      height: 8px;
+      background: rgba(244, 114, 182, 0.35);
+      border-radius: 2px;
+    }
+
+    .sh-lg-err {
+      width: 12px;
+      height: 3px;
+      background: var(--warn);
+      border-radius: 1px;
+    }
+
+    .sh-gate {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .sh-gate--open {
+      opacity: 0.45;
+    }
+
+    .sh-gate--tripped {
+      color: var(--danger);
+      filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.5));
+    }
+
+    .sh-data-source-banner {
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      border: 1px dashed var(--border);
+      margin-bottom: 1rem;
+      line-height: 1.45;
+    }
+
+    .sh-mini-pulse {
+      width: 100%;
+      height: 44px;
+      display: block;
+    }
+
+    /* Provider observability grid — match .sh-comp-table / section density */
+    .sh-pg {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 0.65rem;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .sh-pg-toggle {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.45rem 0.65rem;
+      padding: 0.55rem 0.65rem;
+      font-family: inherit;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      text-align: left;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .sh-pg-toggle:hover {
+      background: rgba(61, 139, 253, 0.06);
+    }
+
+    .sh-pg-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .sh-pg-toggle-icon {
+      flex-shrink: 0;
+      width: 1.65rem;
+      height: 1.65rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1;
+      transition: transform 0.15s ease;
+    }
+
+    .sh-pg-toggle:hover .sh-pg-toggle-icon {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .sh-pg-toggle[aria-expanded="true"] .sh-pg-toggle-icon {
+      transform: rotate(90deg);
+    }
+
+    .sh-pg-title {
+      font-weight: 600;
+      font-size: inherit;
+    }
+
+    .sh-pg-summary {
+      flex: 1 1 100%;
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: left;
+      line-height: 1.4;
+    }
+
+    @media (min-width: 720px) {
+      .sh-pg-summary {
+        flex: 1 1 12rem;
+      }
+    }
+
+    .sh-pg-body {
+      padding: 0.65rem;
+      border-top: none;
+      background: var(--surface);
+    }
+
+    .sh-pr-table-head {
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) minmax(140px, 1.2fr) 72px 88px 52px;
+      gap: 0.35rem 0.5rem;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      padding: 0.35rem 0.65rem 0.5rem;
+      align-items: end;
+      text-align: left;
+    }
+
+    .sh-pr-row {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      background: var(--bg);
+    }
+
+    .sh-pr-cells {
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) minmax(140px, 1.2fr) 72px 88px 52px;
+      gap: 0.35rem 0.5rem;
+      padding: 0.55rem 0.65rem;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 960px) {
+      .sh-pr-table-head,
+      .sh-pr-cells {
+        grid-template-columns: 1fr;
+      }
+
+      .sh-pr-table-head {
+        display: none;
+      }
+    }
+
+    .sh-pr-name {
+      font-weight: 600;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .sh-flow-icon {
+      opacity: 0.75;
+      font-size: 0.9rem;
+    }
+
+    .sh-pr-routing {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+    }
+
+    .sh-flow-arrow {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .sh-flow-target {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .sh-flow-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .sh-flow-receiving {
+      font-size: 0.68rem !important;
+      padding: 0.1rem 0.35rem !important;
+    }
+
+    .sh-cb-pill {
+      display: inline-block;
+      padding: 0.12rem 0.4rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: capitalize;
+      letter-spacing: 0.02em;
+    }
+
+    .sh-cb--closed {
+      background: rgba(34, 197, 94, 0.18);
+      color: var(--success);
+    }
+
+    .sh-cb--open {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+    }
+
+    .sh-cb--half {
+      background: rgba(56, 189, 248, 0.18);
+      color: #38bdf8;
+    }
+
+    .sh-spark-60 {
+      width: 100%;
+      max-width: 180px;
+      height: 36px;
+      display: block;
+    }
+
+    .sh-err-badge {
+      font-family: ui-monospace, monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--warn);
+    }
+
+    .sh-rps {
+      font-family: ui-monospace, monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .sh-hb {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sh-hb-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+      animation: sh-hb-pulse 1.2s ease-in-out infinite;
+    }
+
+    .sh-hb--warn .sh-hb-dot {
+      background: var(--warn);
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+    }
+
+    .sh-hb--bad .sh-hb-dot {
+      background: var(--danger);
+      animation: none;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35);
+    }
+
+    .sh-hb--recover .sh-hb-dot {
+      background: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
+    }
+
+    @keyframes sh-hb-pulse {
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.65;
+        transform: scale(0.92);
+      }
+    }
+
+    .sh-tel-panel {
+      padding: 0.75rem 0.5rem 1rem;
+      border-top: 1px dashed var(--border);
+    }
+
+    .sh-tel-charts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .sh-tel-charts--four {
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+    }
+
+    @media (max-width: 700px) {
+      .sh-tel-charts--four {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sh-four-metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(200px, 1fr));
+      gap: 0.75rem 1rem;
+      align-items: stretch;
+    }
+
+    @media (max-width: 640px) {
+      .sh-four-metric-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sh-metric-chart-box {
+      min-height: 0;
+    }
+
+    .sh-metric-chart-box .sh-axis-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 0 0 0.35rem;
+    }
+
+    .sh-metric-chart-wrap {
+      position: relative;
+      height: 200px;
+    }
+
+    /* Component rows: same 2×2 grid + chart heights as G2 hero (.sh-four-metric-grid) */
+    .sh-comp-metrics-grid {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .sh-comp-metrics-grid .sh-tel-chart-wrap {
+      height: 200px;
+    }
+
+    .sh-comp-metrics-grid .sh-tel-chart-wrap canvas {
+      max-height: 200px;
+    }
+
+    /* Give the metrics column ~half the table so charts match G2 scale (not a narrow strip on the right) */
+    .sh-comp-table.sh-metrics-table {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    .sh-comp-table.sh-metrics-table th:nth-child(1),
+    .sh-comp-table.sh-metrics-table td:nth-child(1) {
+      width: 4.35rem;
+    }
+
+    .sh-comp-table.sh-metrics-table th:nth-child(2),
+    .sh-comp-table.sh-metrics-table td:nth-child(2) {
+      width: 16%;
+    }
+
+    .sh-comp-table.sh-metrics-table th:nth-child(3),
+    .sh-comp-table.sh-metrics-table td:nth-child(3) {
+      width: 26%;
+    }
+
+    .sh-comp-table.sh-metrics-table th:nth-child(4),
+    .sh-comp-table.sh-metrics-table td:nth-child(4) {
+      width: 5.5rem;
+    }
+
+    .sh-comp-table.sh-metrics-table th:nth-child(5),
+    .sh-comp-table.sh-metrics-table td:nth-child(5) {
+      width: 4.25rem;
+    }
+
+    .sh-comp-table.sh-metrics-table th:nth-child(6),
+    .sh-comp-table.sh-metrics-table td:nth-child(6) {
+      width: 2.75rem;
+    }
+
+    .sh-comp-table.sh-metrics-table tr.sh-comp-meta-row td {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .sh-comp-table tbody td {
+      vertical-align: top;
+    }
+
+    .sh-comp-table.sh-metrics-table thead th {
+      vertical-align: bottom;
+    }
+
+    .sh-comp-table.sh-metrics-table tr.sh-comp-charts-row td.sh-comp-charts-cell {
+      padding: 0.65rem 0.65rem 0.85rem;
+      border-top: 1px dashed var(--border);
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    .sh-comp-table.sh-metrics-table tr.sh-comp-meta-row td {
+      border-bottom: none;
+      padding-bottom: 0.35rem;
+    }
+
+    .sh-comp-table.sh-metrics-table tr.sh-comp-charts-row .sh-comp-metrics-grid {
+      width: 100%;
+      max-width: none;
+    }
+
+    .sh-pg-charts-block {
+      margin-bottom: 1rem;
+      padding: 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    .sh-pg-charts-hint {
+      margin: 0 0 0.65rem !important;
+      font-size: 0.82rem !important;
+    }
+
+    .sh-pg-pick-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .sh-pg-pick-table.sh-comp-table th,
+    .sh-pg-pick-table.sh-comp-table td {
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .sh-pg-pick-table th,
+    .sh-pg-pick-table td {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sh-pg-pick-table th {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .sh-pg-pick-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .sh-pg-pick-table select {
+      font: inherit;
+      font-size: 0.82rem;
+      padding: 0.25rem 0.4rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .sh-pg-pick-table th.sh-pg-ch-h,
+    .sh-pg-pick-table td.sh-pg-ch {
+      text-align: center;
+      width: 2rem;
+      padding-left: 0.15rem;
+      padding-right: 0.15rem;
+    }
+
+    .sh-pg-pick-name {
+      font-size: inherit;
+      font-weight: 500;
+    }
+
+    .sh-pg-pick-table th.sh-pg-ch-h {
+      font-size: 0.72rem;
+    }
+
+    .sh-pg-miss {
+      margin: 0 0 0.35rem !important;
+      font-size: 0.82rem !important;
+    }
+
+    .sh-pg-four-grid .sh-tel-chart-wrap {
+      height: 240px;
+    }
+
+    .sh-pg-four-grid .sh-tel-chart-wrap canvas {
+      max-height: 240px;
+    }
+
+    .sh-tel-chart-wrap {
+      position: relative;
+      height: 200px;
+    }
+
+    .sh-tel-chart-wrap canvas {
+      max-height: 200px;
+    }
+
     footer {
       margin-top: 2rem;
       font-size: 0.8rem;
@@ -1117,6 +2046,7 @@
       <nav class="sidebar-nav" role="navigation">
         <button type="button" class="nav-item active" id="nav-test" data-view="test">Test</button>
         <button type="button" class="nav-item" id="nav-history" data-view="history">View Historical Results</button>
+        <button type="button" class="nav-item" id="nav-health" data-view="health">System Health dashboard</button>
         <span class="nav-item-disabled" title="Coming soon">Production Bots</span>
       </nav>
     </aside>
@@ -1337,6 +2267,789 @@
           </footer>
         </div>
       </div>
+
+      <div id="view-health" class="view hidden">
+        <div class="shell shell-health">
+          <header>
+            <h1><span class="brand">Inya.ai</span> System Health</h1>
+            <p>Operational Health Cockpit — high-resolution telemetry (demo).</p>
+          </header>
+
+          <p class="sh-data-source-banner">
+            <strong>Data freshness:</strong> Production UI must stream from the Health Probe Service — <strong>Prometheus</strong> metrics and <strong>Redis</strong> keys (<code>health:{component_id}</code>) — never from cached daily aggregates. Target: <strong>≤60 seconds</strong> behind live probes (15–30s probe interval).
+          </p>
+
+          <div id="sh-realtime-cockpit">
+          <section class="sh-hero sh-hero--ok" id="sh-hero" aria-labelledby="sh-hero-title">
+            <p class="sh-hero-kicker">health:platform · aggregate</p>
+            <h2 class="sh-hero-title" id="sh-hero-title">Within demo thresholds</h2>
+            <p class="sh-hero-sub" id="sh-hero-sub">
+              Probe cadence 15–30s · Chart resolution 60s · Last 5 minutes in each component’s grid. The headline and list below mirror the same demo series as the graphs (not a separate feed).
+            </p>
+            <ul class="sh-hero-alerts" id="sh-hero-alerts" hidden></ul>
+          </section>
+
+          <div class="sh-incident-strip sh-incident-strip--none" role="status">
+            <strong>No additional P0 / P1 banner.</strong> Rolling probe % and circuit gates sit in each component row; when demo metrics breach thresholds, the hero above lists the matching signals.
+          </div>
+
+          <div class="sh-region-bar">
+            <div class="sh-region-tabs" role="tablist" aria-label="Region">
+              <button type="button" class="sh-region-tab" data-region="all" id="sh-reg-all" aria-selected="true">All regions</button>
+              <button type="button" class="sh-region-tab" data-region="north" id="sh-reg-north">North India</button>
+              <button type="button" class="sh-region-tab" data-region="south" id="sh-reg-south">South India</button>
+              <button type="button" class="sh-region-tab" data-region="west" id="sh-reg-west">West India</button>
+            </div>
+            <div>
+              <span class="sh-live-pill"><span class="sh-live-dot" aria-hidden="true"></span> Live</span>
+              <span class="sh-freshness" id="sh-data-freshness">Streaming · ≤60s skew (demo)</span>
+            </div>
+          </div>
+
+          <section class="card sh-section" aria-labelledby="sh-metrics-heading">
+            <h2 id="sh-metrics-heading">Live throughput (last 24h rollup — secondary)</h2>
+            <div class="sh-metrics">
+              <div class="sh-metric-card">
+                <h3>Call success rate</h3>
+                <div class="sh-metric-value" style="color: var(--success)">99.2%</div>
+                <div class="sh-spark" id="sh-spark-success" aria-hidden="true"></div>
+              </div>
+              <div class="sh-metric-card">
+                <h3>Average latency</h3>
+                <div class="sh-metric-value" style="color: var(--accent)">420 ms</div>
+                <div class="sh-spark" id="sh-spark-latency" aria-hidden="true"></div>
+              </div>
+              <div class="sh-metric-card">
+                <h3>Active concurrent calls</h3>
+                <div class="sh-metric-value" style="color: var(--text)">1,284</div>
+                <div class="sh-spark" id="sh-spark-calls" aria-hidden="true"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card sh-section" aria-labelledby="sh-core-heading">
+            <h2 id="sh-core-heading">Group 1 — Core platform (call path)</h2>
+            <p class="hint" style="margin: 0 0 0.75rem">Each component uses <strong>two rows</strong>: identity and status first, then a full-width <strong>2×2 chart block</strong> (latency, VPS, error %, live probes) for the last 5 minutes. Use <strong>▾</strong> beside the ID to hide or show that block. Hover the top row for pass condition.</p>
+            <div class="sh-table-wrap">
+              <table class="sh-comp-table sh-metrics-table">
+                <thead>
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Component</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">5m probe</th>
+                    <th scope="col">Circuit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="sh-comp-meta-row" title="Pass: HTTP 200 within 5s · Probe interval 15–30s">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G1" title="Hide metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      </button>
+                      <span class="sh-comp-id">G1</span>
+                    </td>
+                    <td>Call Trigger API</td>
+                    <td>Initiates outbound calls; entry point</td>
+                    <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                    <td>100%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" id="sh-charts-G1">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G1"></div>
+                    </td>
+                  </tr>
+                  <tr class="sh-comp-meta-row" title="Pass: heartbeat &lt; 2s">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G2" title="Hide metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      </button>
+                      <span class="sh-comp-id">G2</span>
+                    </td>
+                    <td>Voice Orchestrator</td>
+                    <td>Central coordinator; routes AI services</td>
+                    <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                    <td>100%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" id="sh-charts-G2">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G2"></div>
+                    </td>
+                  </tr>
+                  <tr class="sh-comp-meta-row" title="Pass: ARI channel create &lt; 3s">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G3" title="Hide metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      </button>
+                      <span class="sh-comp-id">G3</span>
+                    </td>
+                    <td>Asterisk ARI</td>
+                    <td>SIP channels &amp; bridges; telephony control</td>
+                    <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                    <td>100%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" id="sh-charts-G3">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G3"></div>
+                    </td>
+                  </tr>
+                  <tr class="sh-comp-meta-row" title="Pass: trunk registration OK">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G4" title="Hide metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      </button>
+                      <span class="sh-comp-id">G4</span>
+                    </td>
+                    <td>SIP / VoIP Trunks</td>
+                    <td>PSTN connectivity; audio in/out</td>
+                    <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                    <td>100%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" id="sh-charts-G4">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G4"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card sh-section" aria-labelledby="sh-provider-heading">
+            <h2 id="sh-provider-heading">Provider observability (G5 · G6 · G7)</h2>
+            <p class="hint" style="margin: 0 0 0.75rem">
+              <strong>G5</strong> ASR, <strong>G6</strong> LLM, and <strong>G7</strong> TTS each expose <strong>one shared 2×2 chart block</strong> for the last 60 minutes (demo series). Columns <strong>L / V / E / P</strong> choose which providers appear on the latency, volume, error, and probe charts (independently). The <strong>Latency line</strong> column sets <strong>p50, p95, or p99</strong> for that row on the latency chart only. Provider rows below are routing and summary only.
+            </p>
+
+            <div class="sh-pg" data-pg="asr">
+              <button type="button" class="sh-pg-toggle" aria-expanded="false" aria-controls="pg-body-asr" id="pg-btn-asr">
+                <span class="sh-pg-toggle-icon" aria-hidden="true">▸</span>
+                <span class="sh-comp-id">G5</span>
+                <span class="sh-pg-title">ASR — Operational</span>
+                <span class="sh-badge sh-badge--ok">Aggregate healthy</span>
+                <span class="sh-pg-summary">Gnani (primary) · Azure Speech · Google — probe-weighted mix within SLO</span>
+              </button>
+              <div class="sh-pg-body" id="pg-body-asr" hidden>
+                <div class="sh-pg-charts-block" data-pg-charts data-pg-threshold="3000">
+                  <p class="hint sh-pg-charts-hint">
+                    Shared charts for this group — warning band on latency above <strong>3000 ms</strong> (ASR SLO). Use L/V/E/P to include a provider on each chart independently.
+                  </p>
+                  <table class="sh-pg-pick-table sh-comp-table">
+                    <thead>
+                      <tr>
+                        <th class="sh-pg-ch-h" scope="col" title="Latency chart">L</th>
+                        <th class="sh-pg-ch-h" scope="col" title="Volume chart">V</th>
+                        <th class="sh-pg-ch-h" scope="col" title="Error rate chart">E</th>
+                        <th class="sh-pg-ch-h" scope="col" title="Probe chart">P</th>
+                        <th scope="col">Provider</th>
+                        <th scope="col">Latency line</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr data-provider-seed="asr-gnani">
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Gnani ASR on latency chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Gnani ASR on volume chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Gnani ASR on error chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Gnani ASR on probe chart" /></td>
+                        <td class="sh-pg-pick-name">Gnani ASR</td>
+                        <td>
+                          <select data-pg-lat aria-label="Latency percentile for Gnani ASR">
+                            <option value="p50">p50</option>
+                            <option value="p95" selected>p95</option>
+                            <option value="p99">p99</option>
+                          </select>
+                        </td>
+                      </tr>
+                      <tr data-provider-seed="asr-azure">
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Azure Speech on latency chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Azure Speech on volume chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Azure Speech on error chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Azure Speech on probe chart" /></td>
+                        <td class="sh-pg-pick-name">Azure Speech</td>
+                        <td>
+                          <select data-pg-lat aria-label="Latency percentile for Azure Speech">
+                            <option value="p50">p50</option>
+                            <option value="p95">p95</option>
+                            <option value="p99" selected>p99</option>
+                          </select>
+                        </td>
+                      </tr>
+                      <tr data-provider-seed="asr-google">
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Google STT on latency chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Google STT on volume chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Google STT on error chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Google STT on probe chart" /></td>
+                        <td class="sh-pg-pick-name">Google STT</td>
+                        <td>
+                          <select data-pg-lat aria-label="Latency percentile for Google STT">
+                            <option value="p50" selected>p50</option>
+                            <option value="p95">p95</option>
+                            <option value="p99">p99</option>
+                          </select>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="sh-four-metric-grid sh-pg-four-grid">
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Latency (one percentile per provider)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="lat">No providers selected for this chart (column L).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="lat"></canvas></div>
+                    </div>
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Volume (VPS / RPS)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="vps">No providers selected for this chart (column V).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="vps"></canvas></div>
+                    </div>
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Error rate (%)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="err">No providers selected for this chart (column E).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="err"></canvas></div>
+                    </div>
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Live probes (success %)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="probe">No providers selected for this chart (column P).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="probe"></canvas></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="sh-pr-table-head" aria-hidden="true">
+                  <span>Provider</span>
+                  <span>Routing &amp; breaker</span>
+                  <span>Err (5m)</span>
+                  <span>Load</span>
+                  <span>HB</span>
+                </div>
+                <div class="sh-pr-row" data-provider-seed="asr-gnani" data-threshold-ms="3000">
+                  <div class="sh-pr-cells">
+                    <div class="sh-pr-name"><span class="sh-flow-icon" title="Traffic flow">⎘</span> Gnani ASR</div>
+                    <div class="sh-pr-routing">
+                      <span class="sh-cb-pill sh-cb--open" title="No traffic through primary">Open</span>
+                      <span class="sh-flow-arrow">→</span>
+                      <span class="sh-flow-target">Azure Speech</span>
+                      <span class="sh-flow-note">Fallback active</span>
+                    </div>
+                    <span class="sh-err-badge">0.04%</span>
+                    <span class="sh-rps">0 VPS</span>
+                    <span class="sh-hb sh-hb--bad" title="Heartbeat"><span class="sh-hb-dot"></span></span>
+                  </div>
+                </div>
+                <div class="sh-pr-row" data-provider-seed="asr-azure" data-threshold-ms="3000">
+                  <div class="sh-pr-cells">
+                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Azure Speech</div>
+                    <div class="sh-pr-routing">
+                      <span class="sh-cb-pill sh-cb--closed">Closed</span>
+                      <span class="sh-badge sh-badge--ok sh-flow-receiving">Receiving routed traffic</span>
+                    </div>
+                    <span class="sh-err-badge">0.02%</span>
+                    <span class="sh-rps">612 RPS</span>
+                    <span class="sh-hb sh-hb--ok" title="Heartbeat"><span class="sh-hb-dot"></span></span>
+                  </div>
+                </div>
+                <div class="sh-pr-row" data-provider-seed="asr-google" data-threshold-ms="3000">
+                  <div class="sh-pr-cells">
+                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Google STT</div>
+                    <div class="sh-pr-routing">
+                      <span class="sh-cb-pill sh-cb--half">Half-open</span>
+                      <span class="sh-flow-note">Canary probes only</span>
+                    </div>
+                    <span class="sh-err-badge">0.09%</span>
+                    <span class="sh-rps">28 RPS</span>
+                    <span class="sh-hb sh-hb--warn" title="Heartbeat"><span class="sh-hb-dot"></span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sh-pg" data-pg="llm">
+              <button type="button" class="sh-pg-toggle" aria-expanded="false" aria-controls="pg-body-llm" id="pg-btn-llm">
+                <span class="sh-pg-toggle-icon" aria-hidden="true">▸</span>
+                <span class="sh-comp-id">G6</span>
+                <span class="sh-pg-title">LLM — Degraded</span>
+                <span class="sh-badge sh-badge--degraded">Elevated tail latency</span>
+                <span class="sh-pg-summary">Gnani GPU · OpenAI · Anthropic — matches G6 incident; fallbacks warming</span>
+              </button>
+              <div class="sh-pg-body" id="pg-body-llm" hidden>
+                <div class="sh-pg-charts-block" data-pg-charts data-pg-threshold="2000">
+                  <p class="hint sh-pg-charts-hint">
+                    Shared charts — warning band on latency above <strong>2000 ms</strong> (LLM). Use L/V/E/P per provider as needed.
+                  </p>
+                  <table class="sh-pg-pick-table sh-comp-table">
+                    <thead>
+                      <tr>
+                        <th class="sh-pg-ch-h" scope="col" title="Latency chart">L</th>
+                        <th class="sh-pg-ch-h" scope="col" title="Volume chart">V</th>
+                        <th class="sh-pg-ch-h" scope="col" title="Error rate chart">E</th>
+                        <th class="sh-pg-ch-h" scope="col" title="Probe chart">P</th>
+                        <th scope="col">Provider</th>
+                        <th scope="col">Latency line</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr data-provider-seed="llm-gnani">
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Gnani LLM on latency chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Gnani LLM on volume chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Gnani LLM on error chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Gnani LLM on probe chart" /></td>
+                        <td class="sh-pg-pick-name">Gnani LLM</td>
+                        <td>
+                          <select data-pg-lat aria-label="Latency percentile for Gnani LLM">
+                            <option value="p50">p50</option>
+                            <option value="p95" selected>p95</option>
+                            <option value="p99">p99</option>
+                          </select>
+                        </td>
+                      </tr>
+                      <tr data-provider-seed="llm-openai">
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="OpenAI on latency chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="OpenAI on volume chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="OpenAI on error chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="OpenAI on probe chart" /></td>
+                        <td class="sh-pg-pick-name">OpenAI</td>
+                        <td>
+                          <select data-pg-lat aria-label="Latency percentile for OpenAI">
+                            <option value="p50">p50</option>
+                            <option value="p95">p95</option>
+                            <option value="p99" selected>p99</option>
+                          </select>
+                        </td>
+                      </tr>
+                      <tr data-provider-seed="llm-anthropic">
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Anthropic on latency chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Anthropic on volume chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Anthropic on error chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Anthropic on probe chart" /></td>
+                        <td class="sh-pg-pick-name">Anthropic</td>
+                        <td>
+                          <select data-pg-lat aria-label="Latency percentile for Anthropic">
+                            <option value="p50" selected>p50</option>
+                            <option value="p95">p95</option>
+                            <option value="p99">p99</option>
+                          </select>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="sh-four-metric-grid sh-pg-four-grid">
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Latency (one percentile per provider)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="lat">No providers selected for this chart (column L).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="lat"></canvas></div>
+                    </div>
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Volume (VPS)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="vps">No providers selected for this chart (column V).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="vps"></canvas></div>
+                    </div>
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Error rate (%)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="err">No providers selected for this chart (column E).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="err"></canvas></div>
+                    </div>
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Live probes (success %)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="probe">No providers selected for this chart (column P).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="probe"></canvas></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="sh-pr-table-head" aria-hidden="true">
+                  <span>Provider</span>
+                  <span>Routing &amp; breaker</span>
+                  <span>Err (5m)</span>
+                  <span>Load</span>
+                  <span>HB</span>
+                </div>
+                <div class="sh-pr-row" data-provider-seed="llm-gnani" data-threshold-ms="2000">
+                  <div class="sh-pr-cells">
+                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Gnani LLM</div>
+                    <div class="sh-pr-routing">
+                      <span class="sh-cb-pill sh-cb--open">Open</span>
+                      <span class="sh-flow-arrow">→</span>
+                      <span class="sh-flow-target">OpenAI</span>
+                      <span class="sh-flow-note">Active fallback</span>
+                    </div>
+                    <span class="sh-err-badge">3.8%</span>
+                    <span class="sh-rps">412 VPS</span>
+                    <span class="sh-hb sh-hb--bad" title="Heartbeat"><span class="sh-hb-dot"></span></span>
+                  </div>
+                </div>
+                <div class="sh-pr-row" data-provider-seed="llm-openai" data-threshold-ms="2000">
+                  <div class="sh-pr-cells">
+                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> OpenAI</div>
+                    <div class="sh-pr-routing">
+                      <span class="sh-cb-pill sh-cb--closed">Closed</span>
+                      <span class="sh-badge sh-badge--ok sh-flow-receiving">Primary load shifted here</span>
+                    </div>
+                    <span class="sh-err-badge">0.11%</span>
+                    <span class="sh-rps">318 VPS</span>
+                    <span class="sh-hb sh-hb--ok" title="Heartbeat"><span class="sh-hb-dot"></span></span>
+                  </div>
+                </div>
+                <div class="sh-pr-row" data-provider-seed="llm-anthropic" data-threshold-ms="2000">
+                  <div class="sh-pr-cells">
+                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Anthropic</div>
+                    <div class="sh-pr-routing">
+                      <span class="sh-cb-pill sh-cb--half">Half-open</span>
+                      <span class="sh-flow-note">Testing recovery path</span>
+                    </div>
+                    <span class="sh-err-badge">0.05%</span>
+                    <span class="sh-rps">44 VPS</span>
+                    <span class="sh-hb sh-hb--recover" title="Heartbeat"><span class="sh-hb-dot"></span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sh-pg" data-pg="tts">
+              <button type="button" class="sh-pg-toggle" aria-expanded="false" aria-controls="pg-body-tts" id="pg-btn-tts">
+                <span class="sh-pg-toggle-icon" aria-hidden="true">▸</span>
+                <span class="sh-comp-id">G7</span>
+                <span class="sh-pg-title">TTS — Operational (tail watch)</span>
+                <span class="sh-badge sh-badge--degraded">p99 elevated</span>
+                <span class="sh-pg-summary">Gnani TTS · Azure Neural · Google WaveNet</span>
+              </button>
+              <div class="sh-pg-body" id="pg-body-tts" hidden>
+                <div class="sh-pg-charts-block" data-pg-charts data-pg-threshold="1500">
+                  <p class="hint sh-pg-charts-hint">
+                    Shared charts — warning band on latency above <strong>1500 ms</strong> (TTS). Use L/V/E/P per provider as needed.
+                  </p>
+                  <table class="sh-pg-pick-table sh-comp-table">
+                    <thead>
+                      <tr>
+                        <th class="sh-pg-ch-h" scope="col" title="Latency chart">L</th>
+                        <th class="sh-pg-ch-h" scope="col" title="Volume chart">V</th>
+                        <th class="sh-pg-ch-h" scope="col" title="Error rate chart">E</th>
+                        <th class="sh-pg-ch-h" scope="col" title="Probe chart">P</th>
+                        <th scope="col">Provider</th>
+                        <th scope="col">Latency line</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr data-provider-seed="tts-gnani">
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Gnani TTS on latency chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Gnani TTS on volume chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Gnani TTS on error chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Gnani TTS on probe chart" /></td>
+                        <td class="sh-pg-pick-name">Gnani TTS</td>
+                        <td>
+                          <select data-pg-lat aria-label="Latency percentile for Gnani TTS">
+                            <option value="p50">p50</option>
+                            <option value="p95" selected>p95</option>
+                            <option value="p99">p99</option>
+                          </select>
+                        </td>
+                      </tr>
+                      <tr data-provider-seed="tts-azure">
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Azure Neural TTS on latency chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Azure Neural TTS on volume chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Azure Neural TTS on error chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Azure Neural TTS on probe chart" /></td>
+                        <td class="sh-pg-pick-name">Azure Neural TTS</td>
+                        <td>
+                          <select data-pg-lat aria-label="Latency percentile for Azure Neural TTS">
+                            <option value="p50">p50</option>
+                            <option value="p95">p95</option>
+                            <option value="p99" selected>p99</option>
+                          </select>
+                        </td>
+                      </tr>
+                      <tr data-provider-seed="tts-google">
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Google WaveNet on latency chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Google WaveNet on volume chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Google WaveNet on error chart" /></td>
+                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Google WaveNet on probe chart" /></td>
+                        <td class="sh-pg-pick-name">Google WaveNet</td>
+                        <td>
+                          <select data-pg-lat aria-label="Latency percentile for Google WaveNet">
+                            <option value="p50" selected>p50</option>
+                            <option value="p95">p95</option>
+                            <option value="p99">p99</option>
+                          </select>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="sh-four-metric-grid sh-pg-four-grid">
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Latency (one percentile per provider)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="lat">No providers selected for this chart (column L).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="lat"></canvas></div>
+                    </div>
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Volume (RPS)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="vps">No providers selected for this chart (column V).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="vps"></canvas></div>
+                    </div>
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Error rate (%)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="err">No providers selected for this chart (column E).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="err"></canvas></div>
+                    </div>
+                    <div class="sh-metric-chart-box">
+                      <p class="sh-axis-label">Live probes (success %)</p>
+                      <p class="hint sh-pg-miss hidden" data-pg-miss="probe">No providers selected for this chart (column P).</p>
+                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="probe"></canvas></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="sh-pr-table-head" aria-hidden="true">
+                  <span>Provider</span>
+                  <span>Routing &amp; breaker</span>
+                  <span>Err (5m)</span>
+                  <span>Load</span>
+                  <span>HB</span>
+                </div>
+                <div class="sh-pr-row" data-provider-seed="tts-gnani" data-threshold-ms="1500">
+                  <div class="sh-pr-cells">
+                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Gnani TTS</div>
+                    <div class="sh-pr-routing">
+                      <span class="sh-cb-pill sh-cb--closed">Closed</span>
+                      <span class="sh-flow-note">Primary path</span>
+                    </div>
+                    <span class="sh-err-badge">0.18%</span>
+                    <span class="sh-rps">204 RPS</span>
+                    <span class="sh-hb sh-hb--warn" title="Heartbeat"><span class="sh-hb-dot"></span></span>
+                  </div>
+                </div>
+                <div class="sh-pr-row" data-provider-seed="tts-azure" data-threshold-ms="1500">
+                  <div class="sh-pr-cells">
+                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Azure Neural TTS</div>
+                    <div class="sh-pr-routing">
+                      <span class="sh-cb-pill sh-cb--open">Open</span>
+                      <span class="sh-flow-arrow">→</span>
+                      <span class="sh-flow-target">Google WaveNet</span>
+                      <span class="sh-flow-note">Active fallback</span>
+                    </div>
+                    <span class="sh-err-badge">0.00%</span>
+                    <span class="sh-rps">0 RPS</span>
+                    <span class="sh-hb sh-hb--ok" title="Heartbeat"><span class="sh-hb-dot"></span></span>
+                  </div>
+                </div>
+                <div class="sh-pr-row" data-provider-seed="tts-google" data-threshold-ms="1500">
+                  <div class="sh-pr-cells">
+                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Google WaveNet</div>
+                    <div class="sh-pr-routing">
+                      <span class="sh-cb-pill sh-cb--closed">Closed</span>
+                      <span class="sh-badge sh-badge--ok sh-flow-receiving">Receiving shifted traffic</span>
+                    </div>
+                    <span class="sh-err-badge">0.31%</span>
+                    <span class="sh-rps">18 RPS</span>
+                    <span class="sh-hb sh-hb--recover" title="Heartbeat"><span class="sh-hb-dot"></span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card sh-section" aria-labelledby="sh-infra-heading">
+            <h2 id="sh-infra-heading">Group 2 — Infrastructure (session &amp; async)</h2>
+            <p class="hint" style="margin: 0 0 0.75rem">Redis, queues, and workers — single stack (no nested providers). Use <strong>▾</strong> beside each ID to collapse that row’s charts.</p>
+            <div class="sh-table-wrap">
+              <table class="sh-comp-table sh-metrics-table">
+                <thead>
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Component</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">5m probe</th>
+                    <th scope="col">Circuit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="sh-comp-meta-row" title="Pass: PING &lt; 5ms">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G8" title="Hide metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      </button>
+                      <span class="sh-comp-id">G8</span>
+                    </td>
+                    <td>Redis</td>
+                    <td>Session &amp; circuit-breaker state; pub/sub</td>
+                    <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                    <td>100%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" id="sh-charts-G8">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G8"></div>
+                    </td>
+                  </tr>
+                  <tr class="sh-comp-meta-row" title="Pass: queue depth &lt; threshold">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G9" title="Hide metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      </button>
+                      <span class="sh-comp-id">G9</span>
+                    </td>
+                    <td>RabbitMQ</td>
+                    <td>Async tasks (post-call processing)</td>
+                    <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                    <td>100%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" id="sh-charts-G9">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G9"></div>
+                    </td>
+                  </tr>
+                  <tr class="sh-comp-meta-row" title="Pass: worker heartbeat OK">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G10" title="Hide metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      </button>
+                      <span class="sh-comp-id">G10</span>
+                    </td>
+                    <td>Celery Workers</td>
+                    <td>Post-call processing</td>
+                    <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                    <td>100%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" id="sh-charts-G10">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G10"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card sh-section" aria-labelledby="sh-cust-heading">
+            <h2 id="sh-cust-heading">Customer-configured endpoints (monitored)</h2>
+            <p class="hint" style="margin: 0 0 0.75rem">Same layout as Group 1 — <strong>▾</strong> toggles the chart block under each component.</p>
+            <div class="sh-table-wrap">
+              <table class="sh-comp-table sh-metrics-table">
+                <thead>
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Component</th>
+                    <th scope="col">Role / failure behavior</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">5m probe</th>
+                    <th scope="col">Circuit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="sh-comp-meta-row" title="Pass: 200 with JSON &lt; 3s">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-C1" title="Hide metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      </button>
+                      <span class="sh-comp-id">C1</span>
+                    </td>
+                    <td>Initial Message API</td>
+                    <td>Dynamic opening message · fallback: static message; end gracefully</td>
+                    <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                    <td>100%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" id="sh-charts-C1">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="C1"></div>
+                    </td>
+                  </tr>
+                  <tr class="sh-comp-meta-row" title="Pass: tool schema valid">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-C2" title="Hide metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      </button>
+                      <span class="sh-comp-id">C2</span>
+                    </td>
+                    <td>Tool Calling API(s)</td>
+                    <td>LLM tools during call · inform LLM if unavailable; continue</td>
+                    <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                    <td>100%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" id="sh-charts-C2">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="C2"></div>
+                    </td>
+                  </tr>
+                  <tr class="sh-comp-meta-row" title="Elevated delivery failures">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-C3" title="Hide metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      </button>
+                      <span class="sh-comp-id">C3</span>
+                    </td>
+                    <td>Post-call Webhook</td>
+                    <td>Metadata &amp; transcript · retry with backoff; alert if exhausted</td>
+                    <td><span class="sh-badge sh-badge--degraded">Degraded</span></td>
+                    <td>88%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" id="sh-charts-C3">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="C3"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          </div>
+
+          <section class="card sh-section" aria-labelledby="sh-inc-heading">
+            <h2 id="sh-inc-heading">Incident history</h2>
+            <div class="sh-table-wrap">
+              <table class="sh-data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Duration</th>
+                    <th scope="col">Affected</th>
+                    <th scope="col">Summary</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>2026-04-02</td>
+                    <td>42 min</td>
+                    <td>T3, G7</td>
+                    <td>Elevated TTS latency from fallback provider; traffic shifted to primary.</td>
+                  </tr>
+                  <tr>
+                    <td>2026-03-18</td>
+                    <td>2h 10m</td>
+                    <td>G6, T2</td>
+                    <td>LLM inference saturation; autoscaling recovered; brief fallback-only period.</td>
+                  </tr>
+                  <tr>
+                    <td>2026-02-27</td>
+                    <td>18 min</td>
+                    <td>G3</td>
+                    <td>ARI reconnect storm after carrier flap; no customer data loss.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card sh-section" aria-labelledby="sh-int-heading">
+            <h2 id="sh-int-heading">Subscriptions &amp; API</h2>
+            <p class="hint" style="margin-top: 0">Subscribe for automated notifications; ingest status into your own monitoring.</p>
+            <div class="sh-actions-row">
+              <button type="button" class="btn-primary" id="sh-btn-subscribe">Subscribe to updates</button>
+              <a class="btn-secondary" href="#" id="sh-link-api" style="text-decoration: none; display: inline-block">Health API documentation</a>
+            </div>
+            <p class="sh-note">Demo: wire Subscribe to Email, Slack, or Webhook in production. Health UI should be hosted on infrastructure independent of the call path (PRD).</p>
+          </section>
+
+          <footer>
+            Independent hosting recommended for this dashboard so it stays reachable during platform incidents.
+          </footer>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1495,16 +3208,657 @@
       function showView(name) {
         const isTest = name === "test";
         const isHistory = name === "history";
+        const isHealth = name === "health";
         el("view-test").classList.toggle("hidden", !isTest);
         el("view-history").classList.toggle("hidden", !isHistory);
+        el("view-health").classList.toggle("hidden", !isHealth);
         el("nav-test").classList.toggle("active", isTest);
         el("nav-history").classList.toggle("active", isHistory);
+        el("nav-health").classList.toggle("active", isHealth);
         if (isHistory) {
           el("history-results-section").classList.add("hidden");
           el("history-empty").classList.add("hidden");
           el("history-bot-identifier").value = "";
           el("history-error").classList.add("hidden");
         }
+        if (isHealth) {
+          initHealthDashboard();
+        }
+      }
+
+      function destroyAllHealthDashboardCharts() {
+        const root = el("view-health");
+        if (!root) return;
+        root.querySelectorAll("canvas").forEach(function (cv) {
+          if (cv._shChart) {
+            cv._shChart.destroy();
+            cv._shChart = null;
+          }
+        });
+      }
+
+      function getHealthRegion() {
+        const t = document.querySelector('.sh-region-tab[aria-selected="true"]');
+        return t ? t.getAttribute("data-region") || "all" : "all";
+      }
+
+      function metricBundle5Min(seedStr, regionOff) {
+        const labels = ["-5m", "-4m", "-3m", "-2m", "-1m", "now"];
+        const base = simpleHash("pulse" + seedStr + String(regionOff));
+        function wave(off, mag) {
+          return labels.map(function (_, i) {
+            return (
+              220 +
+              mag * Math.sin((i + off + (base % 7)) * 0.85) +
+              (simpleHash(seedStr + "p" + i + off + regionOff) % 35)
+            );
+          });
+        }
+        return {
+          labels: labels,
+          p50: wave(0, 12),
+          p95: wave(1, 28),
+          p99: wave(2, 55),
+          vps: labels.map(function (_, i) {
+            return 80 + (simpleHash(seedStr + "v" + i + regionOff) % 220);
+          }),
+          err: labels.map(function (_, i) {
+            return Math.min(2.5, ((simpleHash(seedStr + "e" + i + regionOff) % 25) / 10));
+          }),
+          probe: labels.map(function (_, i) {
+            return Math.min(100, 72 + (simpleHash(seedStr + "pr" + i + regionOff) % 28));
+          }),
+        };
+      }
+
+      function metricBundle60m(seed, regionOff) {
+        const n = 60;
+        const labels = [];
+        for (let i = n - 1; i >= 0; i--) labels.push("-" + i + "m");
+        const thr = 800;
+        const p50 = [];
+        const p95 = [];
+        const p99 = [];
+        const vps = [];
+        const err = [];
+        const probe = [];
+        for (let i = 0; i < n; i++) {
+          p50.push(
+            thr * (0.25 + 0.08 * Math.sin(i * 0.11)) + (simpleHash(seed + "a" + i + regionOff) % 90)
+          );
+          p95.push(
+            thr * (0.5 + 0.12 * Math.sin(i * 0.09 + 1)) + (simpleHash(seed + "b" + i + regionOff) % 120)
+          );
+          let p99v =
+            thr * (0.75 + 0.14 * Math.sin(i * 0.08 + 2)) + (simpleHash(seed + "c" + i + regionOff) % 150);
+          if (i > 38 && i < 52) p99v *= 1.12;
+          p99.push(p99v);
+          vps.push(80 + (simpleHash(seed + "v" + i + regionOff) % 420));
+          err.push(Math.min(4, (simpleHash(seed + "e" + i + regionOff) % 45) / 10));
+          probe.push(Math.min(100, 58 + (simpleHash(seed + "pb" + i + regionOff) % 42)));
+        }
+        return { labels: labels, p50: p50, p95: p95, p99: p99, vps: vps, err: err, probe: probe };
+      }
+
+      function chartAxisOpts(compact, xTitle, yTitle, yMin, yMax) {
+        const fs = compact ? 9 : 11;
+        const tfs = compact ? 10 : 11;
+        const yScale = {
+          title: { display: true, text: yTitle, color: "#6b7280", font: { size: tfs } },
+          ticks: { color: "#8b9cb3", font: { size: fs } },
+          grid: { color: "rgba(45,58,79,0.4)" },
+        };
+        if (yMin !== undefined) yScale.min = yMin;
+        if (yMax !== undefined) yScale.max = yMax;
+        return {
+          x: {
+            title: { display: true, text: xTitle, color: "#6b7280", font: { size: tfs } },
+            ticks: { color: "#8b9cb3", maxRotation: 0, maxTicksLimit: compact ? 6 : 12, font: { size: fs } },
+            grid: { color: "rgba(45,58,79,0.35)" },
+          },
+          y: yScale,
+        };
+      }
+
+      var SH_HERO_COMP_IDS = ["G1", "G2", "G3", "G4", "G8", "G9", "G10", "C1", "C2", "C3"];
+      var SH_HERO_COMP_NAMES = {
+        G1: "G1 Call Trigger API",
+        G2: "G2 Voice Orchestrator",
+        G3: "G3 Asterisk ARI",
+        G4: "G4 SIP / VoIP Trunks",
+        G8: "G8 Redis",
+        G9: "G9 RabbitMQ",
+        G10: "G10 Celery Workers",
+        C1: "C1 Initial Message API",
+        C2: "C2 Tool Calling API(s)",
+        C3: "C3 Post-call Webhook",
+      };
+
+      function refreshHealthHero(regionKey) {
+        const hero = el("sh-hero");
+        const titleEl = el("sh-hero-title");
+        const subEl = el("sh-hero-sub");
+        const listEl = el("sh-hero-alerts");
+        if (!hero || !titleEl || !subEl || !listEl) return;
+        const rk = regionKey || "all";
+        const off = { all: 0, north: 3, south: 7, west: 11 }[rk] || 0;
+        function last(arr) {
+          return arr[arr.length - 1];
+        }
+        const alerts = [];
+        SH_HERO_COMP_IDS.forEach(function (cid) {
+          const b = metricBundle5Min("comp" + cid, off);
+          const le = last(b.err);
+          const lp = last(b.probe);
+          const p99 = last(b.p99);
+          const name = SH_HERO_COMP_NAMES[cid] || cid;
+          const parts = [];
+          var sev = 0;
+          if (le >= 2.0) {
+            sev = 2;
+            parts.push("errors " + le.toFixed(1) + "%");
+          } else if (le >= 1.2) {
+            sev = Math.max(sev, 1);
+            parts.push("errors " + le.toFixed(1) + "%");
+          }
+          if (lp < 82) {
+            sev = 2;
+            parts.push("probe " + Math.round(lp) + "%");
+          } else if (lp < 90) {
+            sev = Math.max(sev, 1);
+            parts.push("probe " + Math.round(lp) + "%");
+          }
+          if (p99 >= 650) {
+            sev = 2;
+            parts.push("p99 ~" + Math.round(p99) + " ms");
+          } else if (p99 >= 450) {
+            sev = Math.max(sev, 1);
+            parts.push("p99 ~" + Math.round(p99) + " ms");
+          }
+          if (parts.length) {
+            alerts.push({
+              level: sev >= 2 ? "error" : "warn",
+              text: name + ": " + parts.join(" · ") + " (current window — demo).",
+            });
+          }
+        });
+        listEl.innerHTML = "";
+        hero.classList.remove("sh-hero--ok", "sh-hero--warn", "sh-hero--bad");
+        const hasErr = alerts.some(function (a) {
+          return a.level === "error";
+        });
+        if (alerts.length === 0) {
+          hero.classList.add("sh-hero--ok");
+          titleEl.textContent = "No threshold breaches in demo series";
+          subEl.textContent =
+            "Charts default to expanded — use ▾ beside each ID to hide that component’s 2×2 grid. Switch region to see how the same seeds shift.";
+          listEl.hidden = true;
+          return;
+        }
+        hero.classList.add(hasErr ? "sh-hero--bad" : "sh-hero--warn");
+        titleEl.textContent = hasErr ? "Errors in current demo window" : "Warnings in current demo window";
+        subEl.textContent =
+          "Aligned with the per-component graphs below (same generated series). Resolve in your telemetry backend for production.";
+        listEl.hidden = false;
+        alerts.forEach(function (a) {
+          const li = document.createElement("li");
+          li.textContent = a.text;
+          li.className = a.level === "error" ? "sh-hero-alert--error" : "sh-hero-alert--warn";
+          listEl.appendChild(li);
+        });
+      }
+
+      function buildComponentCharts(wrap, regionKey) {
+        if (typeof Chart === "undefined") return;
+        const compId = wrap.getAttribute("data-comp-four");
+        const off = { all: 0, north: 3, south: 7, west: 11 }[regionKey] || 0;
+        const b = metricBundle5Min("comp" + compId, off);
+        const compact = false;
+        const xTime = "Time (60s buckets, last 5 min)";
+        wrap.querySelectorAll("canvas[data-comp-role]").forEach(function (canvas) {
+          if (canvas._shChart) {
+            canvas._shChart.destroy();
+            canvas._shChart = null;
+          }
+          const role = canvas.getAttribute("data-comp-role");
+          if (role === "lat") {
+            canvas._shChart = new Chart(canvas.getContext("2d"), {
+              type: "line",
+              data: {
+                labels: b.labels,
+                datasets: [
+                  { label: "p50 (ms)", data: b.p50, borderColor: "#38bdf8", tension: 0.3, pointRadius: 2, borderWidth: 2 },
+                  { label: "p95 (ms)", data: b.p95, borderColor: "#a78bfa", borderDash: [6, 4], tension: 0.3, pointRadius: 0, borderWidth: 2 },
+                  { label: "p99 (ms)", data: b.p99, borderColor: "#f472b6", borderDash: [2, 2], tension: 0.3, pointRadius: 0, borderWidth: 2 },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: "#8b9cb3", boxWidth: 12 } } },
+                scales: chartAxisOpts(compact, xTime, "Latency (ms)"),
+              },
+            });
+          } else if (role === "vps") {
+            canvas._shChart = new Chart(canvas.getContext("2d"), {
+              type: "line",
+              data: {
+                labels: b.labels,
+                datasets: [
+                  {
+                    label: "VPS",
+                    data: b.vps,
+                    borderColor: "#38bdf8",
+                    backgroundColor: "rgba(56,189,248,0.08)",
+                    tension: 0.3,
+                    pointRadius: 2,
+                    borderWidth: 2,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: chartAxisOpts(compact, xTime, "Volume (requests / sec)"),
+              },
+            });
+          } else if (role === "err") {
+            canvas._shChart = new Chart(canvas.getContext("2d"), {
+              type: "line",
+              data: {
+                labels: b.labels,
+                datasets: [{ label: "Error %", data: b.err, borderColor: "#f59e0b", tension: 0.3, pointRadius: 2, borderWidth: 2 }],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: chartAxisOpts(compact, xTime, "Error rate (%)", 0),
+              },
+            });
+          } else if (role === "probe") {
+            canvas._shChart = new Chart(canvas.getContext("2d"), {
+              type: "line",
+              data: {
+                labels: b.labels,
+                datasets: [{ label: "Probe success", data: b.probe, borderColor: "#22c55e", tension: 0.3, pointRadius: 2, borderWidth: 2 }],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: chartAxisOpts(compact, xTime, "Rolling probe success (%)", 0, 100),
+              },
+            });
+          }
+        });
+      }
+
+      function ensureCompFourStructure(wrap) {
+        if (!wrap || wrap.dataset.fourReady === "1") return;
+        const compId = wrap.getAttribute("data-comp-four");
+        const labels = [
+          "Latency — p50 / p95 / p99 (ms)",
+          "Volume (VPS)",
+          "Error rate (4xx/5xx %)",
+          "Live probes (success %)",
+        ];
+        const roles = ["lat", "vps", "err", "probe"];
+        for (let i = 0; i < 4; i++) {
+          const box = document.createElement("div");
+          box.className = "sh-metric-chart-box";
+          const lp = document.createElement("p");
+          lp.className = "sh-axis-label";
+          lp.textContent = labels[i];
+          const mw = document.createElement("div");
+          mw.className = "sh-tel-chart-wrap";
+          const canvas = document.createElement("canvas");
+          canvas.setAttribute("data-comp-role", roles[i]);
+          canvas.setAttribute("data-comp-id", compId);
+          mw.appendChild(canvas);
+          box.appendChild(lp);
+          box.appendChild(mw);
+          wrap.appendChild(box);
+        }
+        wrap.dataset.fourReady = "1";
+      }
+
+      function initComponentFourCharts(regionKey) {
+        document.querySelectorAll("[data-comp-four]").forEach(function (wrap) {
+          ensureCompFourStructure(wrap);
+          buildComponentCharts(wrap, regionKey);
+        });
+      }
+
+      var PG_LINE_STYLES = [
+        { color: "#38bdf8", dash: [] },
+        { color: "#a78bfa", dash: [6, 4] },
+        { color: "#f472b6", dash: [3, 3] },
+        { color: "#fbbf24", dash: [8, 4] },
+        { color: "#34d399", dash: [2, 2] },
+        { color: "#94a3b8", dash: [10, 3, 2, 3] },
+      ];
+
+      function destroyPgChartsInBlock(block) {
+        if (!block) return;
+        block.querySelectorAll("canvas[data-pg-chart]").forEach(function (cv) {
+          if (cv._shChart) {
+            cv._shChart.destroy();
+            cv._shChart = null;
+          }
+        });
+      }
+
+      function setPgMetricEmpty(block, chartKey, empty) {
+        const miss = block.querySelector('[data-pg-miss="' + chartKey + '"]');
+        const canvas = block.querySelector('canvas[data-pg-chart="' + chartKey + '"]');
+        const wrap = canvas ? canvas.closest(".sh-tel-chart-wrap") : null;
+        if (miss) miss.classList.toggle("hidden", !empty);
+        if (wrap) wrap.classList.toggle("hidden", empty);
+      }
+
+      function buildPgChartsInBlock(block, regionKey) {
+        if (typeof Chart === "undefined" || !block) return;
+        destroyPgChartsInBlock(block);
+        block.querySelectorAll(".sh-pg-empty-hint").forEach(function (n) {
+          n.remove();
+        });
+        const off = { all: 0, north: 3, south: 7, west: 11 }[regionKey] || 0;
+        const thr = parseInt(block.getAttribute("data-pg-threshold"), 10) || 3000;
+        const rows = block.querySelectorAll(".sh-pg-pick-table tbody tr[data-provider-seed]");
+        const compact = false;
+        const xTitle = "Time (min ago)";
+        const latD = [];
+        const volD = [];
+        const errD = [];
+        const probD = [];
+        var labels = null;
+        for (let r = 0; r < rows.length; r++) {
+          const row = rows[r];
+          const seed = row.getAttribute("data-provider-seed");
+          const pl = row.querySelector("[data-pg-pl]");
+          const pv = row.querySelector("[data-pg-pv]");
+          const pe = row.querySelector("[data-pg-pe]");
+          const pp = row.querySelector("[data-pg-pp]");
+          if (!pl || !pv || !pe || !pp) continue;
+          const nameEl = row.querySelector(".sh-pg-pick-name");
+          const name = nameEl ? nameEl.textContent.trim() : seed;
+          const latSel = row.querySelector("[data-pg-lat]");
+          const latKey = latSel && latSel.value ? latSel.value : "p95";
+          const b = metricBundle60m(seed + "|" + off, off);
+          if (!labels && (pl.checked || pv.checked || pe.checked || pp.checked)) labels = b.labels;
+          const sty = PG_LINE_STYLES[r % PG_LINE_STYLES.length];
+          if (pl.checked) {
+            latD.push({
+              label: name + " · " + latKey,
+              data: b[latKey],
+              borderColor: sty.color,
+              borderDash: sty.dash,
+              tension: 0.2,
+              pointRadius: 0,
+              borderWidth: 2,
+            });
+          }
+          if (pv.checked) {
+            volD.push({
+              label: name,
+              data: b.vps,
+              borderColor: sty.color,
+              borderDash: sty.dash,
+              tension: 0.2,
+              pointRadius: 0,
+              borderWidth: 2,
+            });
+          }
+          if (pe.checked) {
+            errD.push({
+              label: name,
+              data: b.err,
+              borderColor: sty.color,
+              borderDash: sty.dash,
+              tension: 0.2,
+              pointRadius: 0,
+              borderWidth: 2,
+            });
+          }
+          if (pp.checked) {
+            probD.push({
+              label: name,
+              data: b.probe,
+              borderColor: sty.color,
+              borderDash: sty.dash,
+              tension: 0.2,
+              pointRadius: 0,
+              borderWidth: 2,
+            });
+          }
+        }
+        if (!labels) labels = metricBundle60m("shpg-empty|" + off, off).labels;
+        const legendOpts = { labels: { color: "#8b9cb3", boxWidth: 10 } };
+        const thrKey = "pglat" + thr + String(block.closest(".sh-pg-body") && block.closest(".sh-pg-body").id);
+
+        setPgMetricEmpty(block, "lat", !latD.length);
+        setPgMetricEmpty(block, "vps", !volD.length);
+        setPgMetricEmpty(block, "err", !errD.length);
+        setPgMetricEmpty(block, "probe", !probD.length);
+
+        const noCharts = !latD.length && !volD.length && !errD.length && !probD.length;
+        if (noCharts) {
+          const p = document.createElement("p");
+          p.className = "hint sh-pg-empty-hint";
+          p.style.margin = "0 0 0.75rem";
+          p.textContent = "Check at least one L / V / E / P box for at least one provider.";
+          const grid = block.querySelector(".sh-four-metric-grid");
+          if (grid && grid.parentNode) grid.parentNode.insertBefore(p, grid);
+          return;
+        }
+
+        const latCanvas = block.querySelector('canvas[data-pg-chart="lat"]');
+        if (latD.length && latCanvas) {
+          latCanvas._shChart = new Chart(latCanvas.getContext("2d"), {
+            type: "line",
+            plugins: [thresholdWarnPlugin(thr, thrKey)],
+            data: { labels: labels, datasets: latD },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: "index", intersect: false },
+              plugins: { legend: legendOpts },
+              scales: chartAxisOpts(compact, xTitle, "Latency (ms)"),
+            },
+          });
+        }
+        const vCanvas = block.querySelector('canvas[data-pg-chart="vps"]');
+        if (volD.length && vCanvas) {
+          vCanvas._shChart = new Chart(vCanvas.getContext("2d"), {
+            type: "line",
+            data: { labels: labels, datasets: volD },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: "index", intersect: false },
+              plugins: { legend: legendOpts },
+              scales: chartAxisOpts(compact, xTitle, "Volume (requests / sec)"),
+            },
+          });
+        }
+        const eCanvas = block.querySelector('canvas[data-pg-chart="err"]');
+        if (errD.length && eCanvas) {
+          eCanvas._shChart = new Chart(eCanvas.getContext("2d"), {
+            type: "line",
+            data: { labels: labels, datasets: errD },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: "index", intersect: false },
+              plugins: { legend: legendOpts },
+              scales: chartAxisOpts(compact, xTitle, "Error rate (%)", 0),
+            },
+          });
+        }
+        const prCanvas = block.querySelector('canvas[data-pg-chart="probe"]');
+        if (probD.length && prCanvas) {
+          prCanvas._shChart = new Chart(prCanvas.getContext("2d"), {
+            type: "line",
+            data: { labels: labels, datasets: probD },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: "index", intersect: false },
+              plugins: { legend: legendOpts },
+              scales: chartAxisOpts(compact, xTitle, "Rolling probe success (%)", 0, 100),
+            },
+          });
+        }
+      }
+
+      function initPgChartsInBody(body, regionKey) {
+        const block = body.querySelector("[data-pg-charts]");
+        if (!block) return;
+        if (!block.dataset.pgCtrlBound) {
+          block.dataset.pgCtrlBound = "1";
+          block.addEventListener("change", function () {
+            buildPgChartsInBlock(block, getHealthRegion());
+          });
+        }
+        buildPgChartsInBlock(block, regionKey);
+      }
+
+      function thresholdWarnPlugin(thresholdMs, uniqueKey) {
+        const t = Number(thresholdMs) || 3000;
+        const u = String(uniqueKey || "x").replace(/[^a-z0-9]/gi, "");
+        return {
+          id: "shThr" + t + u.slice(0, 24),
+          beforeDatasetsDraw: function (chart) {
+            const yScale = chart.scales.y;
+            if (!chart.chartArea || !yScale) return;
+            if (yScale.max <= t) return;
+            const top = chart.chartArea.top;
+            const left = chart.chartArea.left;
+            const right = chart.chartArea.right;
+            const yPix = yScale.getPixelForValue(t);
+            if (yPix <= top) return;
+            const ctx = chart.ctx;
+            ctx.save();
+            ctx.fillStyle = "rgba(245, 158, 11, 0.14)";
+            ctx.fillRect(left, top, right - left, yPix - top);
+            ctx.strokeStyle = "rgba(245, 158, 11, 0.45)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.moveTo(left, yPix);
+            ctx.lineTo(right, yPix);
+            ctx.stroke();
+            ctx.restore();
+          },
+        };
+      }
+
+      function bindProviderObservability() {
+        if (bindProviderObservability._done) return;
+        bindProviderObservability._done = true;
+        document.querySelectorAll(".sh-pg-toggle").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            const exp = btn.getAttribute("aria-expanded") === "true";
+            const bodyId = btn.getAttribute("aria-controls");
+            const body = bodyId ? el(bodyId) : null;
+            btn.setAttribute("aria-expanded", String(!exp));
+            if (body) body.hidden = exp;
+            if (!exp) {
+              setTimeout(function () {
+                initPgChartsInBody(body, getHealthRegion());
+              }, 0);
+            }
+          });
+        });
+      }
+
+      function initHealthDashboard() {
+        destroyAllHealthDashboardCharts();
+        renderHealthSparklines();
+        const reg = getHealthRegion();
+        initComponentFourCharts(reg);
+        refreshHealthHero(reg);
+        document.querySelectorAll(".sh-pg-body").forEach(function (body) {
+          if (!body.hidden) initPgChartsInBody(body, reg);
+        });
+      }
+
+      function bindHealthUi() {
+        if (bindHealthUi._done) return;
+        bindHealthUi._done = true;
+        document.querySelectorAll(".sh-region-tab").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document.querySelectorAll(".sh-region-tab").forEach(function (b) {
+              b.setAttribute("aria-selected", "false");
+            });
+            btn.setAttribute("aria-selected", "true");
+            const r = btn.getAttribute("data-region") || "all";
+            destroyAllHealthDashboardCharts();
+            initComponentFourCharts(r);
+            refreshHealthHero(r);
+            document.querySelectorAll(".sh-pg-body").forEach(function (body) {
+              if (!body.hidden) initPgChartsInBody(body, r);
+            });
+            const fresh = el("sh-data-freshness");
+            if (fresh) {
+              fresh.textContent = "Region: " + btn.textContent.trim() + " · ≤60s skew (demo)";
+            }
+          });
+        });
+        bindProviderObservability();
+        if (!bindHealthUi._chartToggle) {
+          bindHealthUi._chartToggle = true;
+          document.addEventListener("click", function (ev) {
+            const btn = ev.target.closest(".sh-comp-chart-toggle");
+            if (!btn) return;
+            const vh = el("view-health");
+            if (!vh || !vh.contains(btn)) return;
+            ev.preventDefault();
+            const tid = btn.getAttribute("aria-controls");
+            const tr = tid ? document.getElementById(tid) : null;
+            if (!tr || !tr.classList.contains("sh-comp-charts-row")) return;
+            const open = btn.getAttribute("aria-expanded") === "true";
+            btn.setAttribute("aria-expanded", String(!open));
+            tr.hidden = open;
+            const icon = btn.querySelector(".sh-comp-toggle-icon");
+            if (icon) icon.textContent = open ? "▸" : "▾";
+            btn.setAttribute("title", open ? "Show metrics charts" : "Hide metrics charts");
+            if (!open) {
+              tr.querySelectorAll("canvas").forEach(function (cv) {
+                if (cv._shChart) {
+                  requestAnimationFrame(function () {
+                    cv._shChart.resize();
+                  });
+                }
+              });
+            }
+          });
+        }
+      }
+
+      function renderHealthSparklines() {
+        function fill(id, n, hfn) {
+          const box = el(id);
+          if (!box || box.dataset.done) return;
+          box.dataset.done = "1";
+          box.innerHTML = "";
+          for (let i = 0; i < n; i++) {
+            const s = document.createElement("span");
+            s.style.height = hfn(i) + "%";
+            box.appendChild(s);
+          }
+        }
+        fill("sh-spark-success", 36, function (i) {
+          return 40 + (simpleHash("s" + i) % 55);
+        });
+        fill("sh-spark-latency", 36, function (i) {
+          return 25 + (simpleHash("l" + i) % 65);
+        });
+        fill("sh-spark-calls", 36, function (i) {
+          return 30 + (simpleHash("c" + i) % 60);
+        });
       }
 
       function personaLabel(key) {
@@ -2222,6 +4576,19 @@
         showView("history");
       });
 
+      el("nav-health").addEventListener("click", function () {
+        showView("health");
+      });
+
+      el("sh-btn-subscribe").addEventListener("click", function () {
+        alert("Connect Email, Slack, or Webhook subscriptions via your Inya.ai account settings (demo).");
+      });
+
+      el("sh-link-api").addEventListener("click", function (e) {
+        e.preventDefault();
+        alert("Link to Health API OpenAPI / docs (demo).");
+      });
+
       function wirePromptEditor() {
         if (!promptInputBound) {
           promptInputBound = true;
@@ -2356,6 +4723,7 @@
       bindTestResultsActions();
       bindPersonaCheckboxes();
       syncPersonaSummary();
+      bindHealthUi();
     })();
   </script>
 </body>
