@@ -1534,16 +1534,6 @@
       filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.5));
     }
 
-    .sh-data-source-banner {
-      font-size: 0.78rem;
-      color: var(--muted);
-      padding: 0.65rem 0.85rem;
-      border-radius: 8px;
-      border: 1px dashed var(--border);
-      margin-bottom: 1rem;
-      line-height: 1.45;
-    }
-
     .sh-mini-pulse {
       width: 100%;
       height: 44px;
@@ -1909,6 +1899,13 @@
       width: 2.75rem;
     }
 
+    .sh-comp-table.sh-cust-metrics-table.sh-metrics-table th:nth-child(7),
+    .sh-comp-table.sh-cust-metrics-table.sh-metrics-table td:nth-child(7) {
+      width: 7.25rem;
+      text-align: left;
+      white-space: nowrap;
+    }
+
     .sh-comp-table.sh-metrics-table tr.sh-comp-meta-row td {
       word-wrap: break-word;
       overflow-wrap: break-word;
@@ -1945,11 +1942,6 @@
       border: 1px solid var(--border);
       border-radius: 10px;
       background: rgba(0, 0, 0, 0.12);
-    }
-
-    .sh-pg-charts-hint {
-      margin: 0 0 0.65rem !important;
-      font-size: 0.82rem !important;
     }
 
     .sh-pg-pick-table {
@@ -2029,6 +2021,76 @@
 
     .sh-tel-chart-wrap canvas {
       max-height: 200px;
+    }
+
+    .sh-cust-dialog {
+      border: none;
+      padding: 0;
+      border-radius: 12px;
+      max-width: min(92vw, 720px);
+      width: 100%;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+    }
+
+    .sh-cust-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.55);
+    }
+
+    .sh-cust-dialog-panel {
+      padding: 1.1rem 1.2rem 1.2rem;
+      max-height: min(78vh, 640px);
+      overflow-y: auto;
+    }
+
+    .sh-cust-dialog-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .sh-cust-dialog-head h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .sh-cust-dialog-x {
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--muted);
+      font-size: 1.25rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .sh-cust-dialog-x:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .sh-cust-dialog-lead {
+      margin: 0 0 0.75rem !important;
+      font-size: 0.82rem !important;
+    }
+
+    .sh-cust-circuit-open {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    .sh-cust-circuit-closed {
+      color: var(--success);
+      font-weight: 600;
     }
 
     footer {
@@ -2275,16 +2337,12 @@
             <p>Operational Health Cockpit — high-resolution telemetry (demo).</p>
           </header>
 
-          <p class="sh-data-source-banner">
-            <strong>Data freshness:</strong> Production UI must stream from the Health Probe Service — <strong>Prometheus</strong> metrics and <strong>Redis</strong> keys (<code>health:{component_id}</code>) — never from cached daily aggregates. Target: <strong>≤60 seconds</strong> behind live probes (15–30s probe interval).
-          </p>
-
           <div id="sh-realtime-cockpit">
           <section class="sh-hero sh-hero--ok" id="sh-hero" aria-labelledby="sh-hero-title">
             <p class="sh-hero-kicker">health:platform · aggregate</p>
-            <h2 class="sh-hero-title" id="sh-hero-title">Within demo thresholds</h2>
+            <h2 class="sh-hero-title" id="sh-hero-title">All Systems Operational</h2>
             <p class="sh-hero-sub" id="sh-hero-sub">
-              Probe cadence 15–30s · Chart resolution 60s · Last 5 minutes in each component’s grid. The headline and list below mirror the same demo series as the graphs (not a separate feed).
+              Probe cadence 15–30s · Chart resolution 60s · Per-component grids start collapsed — expand with ▸ beside each ID. The headline and list below mirror the same demo series as the graphs (not a separate feed).
             </p>
             <ul class="sh-hero-alerts" id="sh-hero-alerts" hidden></ul>
           </section>
@@ -2315,21 +2373,27 @@
                 <div class="sh-spark" id="sh-spark-success" aria-hidden="true"></div>
               </div>
               <div class="sh-metric-card">
-                <h3>Average latency</h3>
-                <div class="sh-metric-value" style="color: var(--accent)">420 ms</div>
+                <h3>P99 Latency</h3>
+                <div class="sh-metric-value" style="color: var(--accent)">610 ms</div>
+                <p class="hint" style="margin: 0.35rem 0 0; font-size: 0.75rem; color: var(--muted)">p99 across all components</p>
                 <div class="sh-spark" id="sh-spark-latency" aria-hidden="true"></div>
               </div>
               <div class="sh-metric-card">
                 <h3>Active concurrent calls</h3>
-                <div class="sh-metric-value" style="color: var(--text)">1,284</div>
+                <div class="sh-metric-value" style="color: var(--text)">1,284 / 2,000</div>
+                <p class="hint" style="margin: 0.35rem 0 0; font-size: 0.75rem; color: var(--muted)">of platform capacity</p>
                 <div class="sh-spark" id="sh-spark-calls" aria-hidden="true"></div>
+              </div>
+              <div class="sh-metric-card">
+                <h3>Open Circuits</h3>
+                <div class="sh-metric-value" id="sh-metric-open-circuits" style="color: var(--success)">0</div>
+                <p class="hint" id="sh-metric-open-circuits-sub" style="margin: 0.35rem 0 0; font-size: 0.75rem; color: var(--muted)">all providers healthy</p>
               </div>
             </div>
           </section>
 
           <section class="card sh-section" aria-labelledby="sh-core-heading">
             <h2 id="sh-core-heading">Group 1 — Core platform (call path)</h2>
-            <p class="hint" style="margin: 0 0 0.75rem">Each component uses <strong>two rows</strong>: identity and status first, then a full-width <strong>2×2 chart block</strong> (latency, VPS, error %, live probes) for the last 5 minutes. Use <strong>▾</strong> beside the ID to hide or show that block. Hover the top row for pass condition.</p>
             <div class="sh-table-wrap">
               <table class="sh-comp-table sh-metrics-table">
                 <thead>
@@ -2345,8 +2409,8 @@
                 <tbody>
                   <tr class="sh-comp-meta-row" title="Pass: HTTP 200 within 5s · Probe interval 15–30s">
                     <td class="sh-comp-id-wrap">
-                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G1" title="Hide metrics charts">
-                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-G1" title="Show metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
                       </button>
                       <span class="sh-comp-id">G1</span>
                     </td>
@@ -2356,15 +2420,15 @@
                     <td>100%</td>
                     <td><span class="sh-gate sh-gate--open">⛩</span></td>
                   </tr>
-                  <tr class="sh-comp-charts-row" id="sh-charts-G1">
+                  <tr class="sh-comp-charts-row" hidden id="sh-charts-G1">
                     <td colspan="6" class="sh-comp-charts-cell">
                       <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G1"></div>
                     </td>
                   </tr>
                   <tr class="sh-comp-meta-row" title="Pass: heartbeat &lt; 2s">
                     <td class="sh-comp-id-wrap">
-                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G2" title="Hide metrics charts">
-                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-G2" title="Show metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
                       </button>
                       <span class="sh-comp-id">G2</span>
                     </td>
@@ -2374,15 +2438,15 @@
                     <td>100%</td>
                     <td><span class="sh-gate sh-gate--open">⛩</span></td>
                   </tr>
-                  <tr class="sh-comp-charts-row" id="sh-charts-G2">
+                  <tr class="sh-comp-charts-row" hidden id="sh-charts-G2">
                     <td colspan="6" class="sh-comp-charts-cell">
                       <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G2"></div>
                     </td>
                   </tr>
                   <tr class="sh-comp-meta-row" title="Pass: ARI channel create &lt; 3s">
                     <td class="sh-comp-id-wrap">
-                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G3" title="Hide metrics charts">
-                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-G3" title="Show metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
                       </button>
                       <span class="sh-comp-id">G3</span>
                     </td>
@@ -2392,15 +2456,15 @@
                     <td>100%</td>
                     <td><span class="sh-gate sh-gate--open">⛩</span></td>
                   </tr>
-                  <tr class="sh-comp-charts-row" id="sh-charts-G3">
+                  <tr class="sh-comp-charts-row" hidden id="sh-charts-G3">
                     <td colspan="6" class="sh-comp-charts-cell">
                       <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G3"></div>
                     </td>
                   </tr>
                   <tr class="sh-comp-meta-row" title="Pass: trunk registration OK">
                     <td class="sh-comp-id-wrap">
-                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G4" title="Hide metrics charts">
-                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-G4" title="Show metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
                       </button>
                       <span class="sh-comp-id">G4</span>
                     </td>
@@ -2410,7 +2474,7 @@
                     <td>100%</td>
                     <td><span class="sh-gate sh-gate--open">⛩</span></td>
                   </tr>
-                  <tr class="sh-comp-charts-row" id="sh-charts-G4">
+                  <tr class="sh-comp-charts-row" hidden id="sh-charts-G4">
                     <td colspan="6" class="sh-comp-charts-cell">
                       <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G4"></div>
                     </td>
@@ -2422,434 +2486,289 @@
 
           <section class="card sh-section" aria-labelledby="sh-provider-heading">
             <h2 id="sh-provider-heading">Provider observability (G5 · G6 · G7)</h2>
-            <p class="hint" style="margin: 0 0 0.75rem">
-              <strong>G5</strong> ASR, <strong>G6</strong> LLM, and <strong>G7</strong> TTS each expose <strong>one shared 2×2 chart block</strong> for the last 60 minutes (demo series). Columns <strong>L / V / E / P</strong> choose which providers appear on the latency, volume, error, and probe charts (independently). The <strong>Latency line</strong> column sets <strong>p50, p95, or p99</strong> for that row on the latency chart only. Provider rows below are routing and summary only.
-            </p>
+            <div class="sh-table-wrap">
+              <table class="sh-comp-table sh-metrics-table">
+                <thead>
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Component</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">5m probe</th>
+                    <th scope="col">Circuit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="sh-comp-meta-row" title="Aggregate across ASR providers">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-pv-agg-G5" title="Show provider table">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle provider group</span>
+                      </button>
+                      <span class="sh-comp-id">G5</span>
+                    </td>
+                    <td>ASR (multi-provider)</td>
+                    <td>Speech-to-text routing; fallbacks &amp; breakers</td>
+                    <td><span class="sh-badge sh-badge--degraded">Degraded</span></td>
+                    <td>97%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" hidden id="sh-pv-agg-G5">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-table-wrap">
+                        <table class="sh-comp-table sh-metrics-table">
+                          <thead>
+                            <tr>
+                              <th scope="col">ID</th>
+                              <th scope="col">Component</th>
+                              <th scope="col">Role</th>
+                              <th scope="col">Status</th>
+                              <th scope="col">5m probe</th>
+                              <th scope="col">Circuit</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr class="sh-comp-meta-row">
+                              <td class="sh-comp-id-wrap">
+                                <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-pv-asr-gnani" title="Show metrics charts">
+                                  <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
+                                </button>
+                                <span class="sh-comp-id">asr-gnani</span>
+                              </td>
+                              <td>Gnani ASR</td>
+                              <td>Primary STT backend</td>
+                              <td><span class="sh-badge sh-badge--bad">Unhealthy</span></td>
+                              <td>94%</td>
+                              <td><span class="sh-cb-pill sh-cb--open">Open</span></td>
+                            </tr>
+                            <tr class="sh-comp-charts-row" hidden id="sh-charts-pv-asr-gnani">
+                              <td colspan="6" class="sh-comp-charts-cell">
+                                <div class="sh-four-metric-grid sh-comp-metrics-grid" data-provider-four="asr-gnani" data-pg-threshold="3000"></div>
+                              </td>
+                            </tr>
+                            <tr class="sh-comp-meta-row">
+                              <td class="sh-comp-id-wrap">
+                                <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-pv-asr-azure" title="Show metrics charts">
+                                  <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
+                                </button>
+                                <span class="sh-comp-id">asr-azure</span>
+                              </td>
+                              <td>Azure Speech</td>
+                              <td>Regional STT fallback</td>
+                              <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                              <td>99%</td>
+                              <td><span class="sh-cb-pill sh-cb--closed">Closed</span></td>
+                            </tr>
+                            <tr class="sh-comp-charts-row" hidden id="sh-charts-pv-asr-azure">
+                              <td colspan="6" class="sh-comp-charts-cell">
+                                <div class="sh-four-metric-grid sh-comp-metrics-grid" data-provider-four="asr-azure" data-pg-threshold="3000"></div>
+                              </td>
+                            </tr>
+                            <tr class="sh-comp-meta-row">
+                              <td class="sh-comp-id-wrap">
+                                <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-pv-asr-google" title="Show metrics charts">
+                                  <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
+                                </button>
+                                <span class="sh-comp-id">asr-google</span>
+                              </td>
+                              <td>Google STT</td>
+                              <td>Secondary / canary path</td>
+                              <td><span class="sh-badge sh-badge--degraded">Degraded</span></td>
+                              <td>91%</td>
+                              <td><span class="sh-cb-pill sh-cb--half">Half-open</span></td>
+                            </tr>
+                            <tr class="sh-comp-charts-row" hidden id="sh-charts-pv-asr-google">
+                              <td colspan="6" class="sh-comp-charts-cell">
+                                <div class="sh-four-metric-grid sh-comp-metrics-grid" data-provider-four="asr-google" data-pg-threshold="3000"></div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
 
-            <div class="sh-pg" data-pg="asr">
-              <button type="button" class="sh-pg-toggle" aria-expanded="false" aria-controls="pg-body-asr" id="pg-btn-asr">
-                <span class="sh-pg-toggle-icon" aria-hidden="true">▸</span>
-                <span class="sh-comp-id">G5</span>
-                <span class="sh-pg-title">ASR — Operational</span>
-                <span class="sh-badge sh-badge--ok">Aggregate healthy</span>
-                <span class="sh-pg-summary">Gnani (primary) · Azure Speech · Google — probe-weighted mix within SLO</span>
-              </button>
-              <div class="sh-pg-body" id="pg-body-asr" hidden>
-                <div class="sh-pg-charts-block" data-pg-charts data-pg-threshold="3000">
-                  <p class="hint sh-pg-charts-hint">
-                    Shared charts for this group — warning band on latency above <strong>3000 ms</strong> (ASR SLO). Use L/V/E/P to include a provider on each chart independently.
-                  </p>
-                  <table class="sh-pg-pick-table sh-comp-table">
-                    <thead>
-                      <tr>
-                        <th class="sh-pg-ch-h" scope="col" title="Latency chart">L</th>
-                        <th class="sh-pg-ch-h" scope="col" title="Volume chart">V</th>
-                        <th class="sh-pg-ch-h" scope="col" title="Error rate chart">E</th>
-                        <th class="sh-pg-ch-h" scope="col" title="Probe chart">P</th>
-                        <th scope="col">Provider</th>
-                        <th scope="col">Latency line</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr data-provider-seed="asr-gnani">
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Gnani ASR on latency chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Gnani ASR on volume chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Gnani ASR on error chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Gnani ASR on probe chart" /></td>
-                        <td class="sh-pg-pick-name">Gnani ASR</td>
-                        <td>
-                          <select data-pg-lat aria-label="Latency percentile for Gnani ASR">
-                            <option value="p50">p50</option>
-                            <option value="p95" selected>p95</option>
-                            <option value="p99">p99</option>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr data-provider-seed="asr-azure">
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Azure Speech on latency chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Azure Speech on volume chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Azure Speech on error chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Azure Speech on probe chart" /></td>
-                        <td class="sh-pg-pick-name">Azure Speech</td>
-                        <td>
-                          <select data-pg-lat aria-label="Latency percentile for Azure Speech">
-                            <option value="p50">p50</option>
-                            <option value="p95">p95</option>
-                            <option value="p99" selected>p99</option>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr data-provider-seed="asr-google">
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Google STT on latency chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Google STT on volume chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Google STT on error chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Google STT on probe chart" /></td>
-                        <td class="sh-pg-pick-name">Google STT</td>
-                        <td>
-                          <select data-pg-lat aria-label="Latency percentile for Google STT">
-                            <option value="p50" selected>p50</option>
-                            <option value="p95">p95</option>
-                            <option value="p99">p99</option>
-                          </select>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div class="sh-four-metric-grid sh-pg-four-grid">
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Latency (one percentile per provider)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="lat">No providers selected for this chart (column L).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="lat"></canvas></div>
-                    </div>
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Volume (VPS / RPS)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="vps">No providers selected for this chart (column V).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="vps"></canvas></div>
-                    </div>
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Error rate (%)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="err">No providers selected for this chart (column E).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="err"></canvas></div>
-                    </div>
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Live probes (success %)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="probe">No providers selected for this chart (column P).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="probe"></canvas></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="sh-pr-table-head" aria-hidden="true">
-                  <span>Provider</span>
-                  <span>Routing &amp; breaker</span>
-                  <span>Err (5m)</span>
-                  <span>Load</span>
-                  <span>HB</span>
-                </div>
-                <div class="sh-pr-row" data-provider-seed="asr-gnani" data-threshold-ms="3000">
-                  <div class="sh-pr-cells">
-                    <div class="sh-pr-name"><span class="sh-flow-icon" title="Traffic flow">⎘</span> Gnani ASR</div>
-                    <div class="sh-pr-routing">
-                      <span class="sh-cb-pill sh-cb--open" title="No traffic through primary">Open</span>
-                      <span class="sh-flow-arrow">→</span>
-                      <span class="sh-flow-target">Azure Speech</span>
-                      <span class="sh-flow-note">Fallback active</span>
-                    </div>
-                    <span class="sh-err-badge">0.04%</span>
-                    <span class="sh-rps">0 VPS</span>
-                    <span class="sh-hb sh-hb--bad" title="Heartbeat"><span class="sh-hb-dot"></span></span>
-                  </div>
-                </div>
-                <div class="sh-pr-row" data-provider-seed="asr-azure" data-threshold-ms="3000">
-                  <div class="sh-pr-cells">
-                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Azure Speech</div>
-                    <div class="sh-pr-routing">
-                      <span class="sh-cb-pill sh-cb--closed">Closed</span>
-                      <span class="sh-badge sh-badge--ok sh-flow-receiving">Receiving routed traffic</span>
-                    </div>
-                    <span class="sh-err-badge">0.02%</span>
-                    <span class="sh-rps">612 RPS</span>
-                    <span class="sh-hb sh-hb--ok" title="Heartbeat"><span class="sh-hb-dot"></span></span>
-                  </div>
-                </div>
-                <div class="sh-pr-row" data-provider-seed="asr-google" data-threshold-ms="3000">
-                  <div class="sh-pr-cells">
-                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Google STT</div>
-                    <div class="sh-pr-routing">
-                      <span class="sh-cb-pill sh-cb--half">Half-open</span>
-                      <span class="sh-flow-note">Canary probes only</span>
-                    </div>
-                    <span class="sh-err-badge">0.09%</span>
-                    <span class="sh-rps">28 RPS</span>
-                    <span class="sh-hb sh-hb--warn" title="Heartbeat"><span class="sh-hb-dot"></span></span>
-                  </div>
-                </div>
-              </div>
-            </div>
+                  <tr class="sh-comp-meta-row" title="Aggregate across LLM providers">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-pv-agg-G6" title="Show provider table">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle provider group</span>
+                      </button>
+                      <span class="sh-comp-id">G6</span>
+                    </td>
+                    <td>LLM (multi-provider)</td>
+                    <td>Inference routing; token budgets</td>
+                    <td><span class="sh-badge sh-badge--degraded">Degraded</span></td>
+                    <td>96%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" hidden id="sh-pv-agg-G6">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-table-wrap">
+                        <table class="sh-comp-table sh-metrics-table">
+                          <thead>
+                            <tr>
+                              <th scope="col">ID</th>
+                              <th scope="col">Component</th>
+                              <th scope="col">Role</th>
+                              <th scope="col">Status</th>
+                              <th scope="col">5m probe</th>
+                              <th scope="col">Circuit</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr class="sh-comp-meta-row">
+                              <td class="sh-comp-id-wrap">
+                                <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-pv-llm-gnani" title="Show metrics charts">
+                                  <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
+                                </button>
+                                <span class="sh-comp-id">llm-gnani</span>
+                              </td>
+                              <td>Gnani LLM</td>
+                              <td>Primary GPU inference</td>
+                              <td><span class="sh-badge sh-badge--bad">Unhealthy</span></td>
+                              <td>89%</td>
+                              <td><span class="sh-cb-pill sh-cb--open">Open</span></td>
+                            </tr>
+                            <tr class="sh-comp-charts-row" hidden id="sh-charts-pv-llm-gnani">
+                              <td colspan="6" class="sh-comp-charts-cell">
+                                <div class="sh-four-metric-grid sh-comp-metrics-grid" data-provider-four="llm-gnani" data-pg-threshold="2000"></div>
+                              </td>
+                            </tr>
+                            <tr class="sh-comp-meta-row">
+                              <td class="sh-comp-id-wrap">
+                                <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-pv-llm-openai" title="Show metrics charts">
+                                  <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
+                                </button>
+                                <span class="sh-comp-id">llm-openai</span>
+                              </td>
+                              <td>OpenAI</td>
+                              <td>Fallback / burst capacity</td>
+                              <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                              <td>99%</td>
+                              <td><span class="sh-cb-pill sh-cb--closed">Closed</span></td>
+                            </tr>
+                            <tr class="sh-comp-charts-row" hidden id="sh-charts-pv-llm-openai">
+                              <td colspan="6" class="sh-comp-charts-cell">
+                                <div class="sh-four-metric-grid sh-comp-metrics-grid" data-provider-four="llm-openai" data-pg-threshold="2000"></div>
+                              </td>
+                            </tr>
+                            <tr class="sh-comp-meta-row">
+                              <td class="sh-comp-id-wrap">
+                                <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-pv-llm-anthropic" title="Show metrics charts">
+                                  <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
+                                </button>
+                                <span class="sh-comp-id">llm-anthropic</span>
+                              </td>
+                              <td>Anthropic</td>
+                              <td>Alternate model family</td>
+                              <td><span class="sh-badge sh-badge--degraded">Degraded</span></td>
+                              <td>93%</td>
+                              <td><span class="sh-cb-pill sh-cb--half">Half-open</span></td>
+                            </tr>
+                            <tr class="sh-comp-charts-row" hidden id="sh-charts-pv-llm-anthropic">
+                              <td colspan="6" class="sh-comp-charts-cell">
+                                <div class="sh-four-metric-grid sh-comp-metrics-grid" data-provider-four="llm-anthropic" data-pg-threshold="2000"></div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
 
-            <div class="sh-pg" data-pg="llm">
-              <button type="button" class="sh-pg-toggle" aria-expanded="false" aria-controls="pg-body-llm" id="pg-btn-llm">
-                <span class="sh-pg-toggle-icon" aria-hidden="true">▸</span>
-                <span class="sh-comp-id">G6</span>
-                <span class="sh-pg-title">LLM — Degraded</span>
-                <span class="sh-badge sh-badge--degraded">Elevated tail latency</span>
-                <span class="sh-pg-summary">Gnani GPU · OpenAI · Anthropic — matches G6 incident; fallbacks warming</span>
-              </button>
-              <div class="sh-pg-body" id="pg-body-llm" hidden>
-                <div class="sh-pg-charts-block" data-pg-charts data-pg-threshold="2000">
-                  <p class="hint sh-pg-charts-hint">
-                    Shared charts — warning band on latency above <strong>2000 ms</strong> (LLM). Use L/V/E/P per provider as needed.
-                  </p>
-                  <table class="sh-pg-pick-table sh-comp-table">
-                    <thead>
-                      <tr>
-                        <th class="sh-pg-ch-h" scope="col" title="Latency chart">L</th>
-                        <th class="sh-pg-ch-h" scope="col" title="Volume chart">V</th>
-                        <th class="sh-pg-ch-h" scope="col" title="Error rate chart">E</th>
-                        <th class="sh-pg-ch-h" scope="col" title="Probe chart">P</th>
-                        <th scope="col">Provider</th>
-                        <th scope="col">Latency line</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr data-provider-seed="llm-gnani">
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Gnani LLM on latency chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Gnani LLM on volume chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Gnani LLM on error chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Gnani LLM on probe chart" /></td>
-                        <td class="sh-pg-pick-name">Gnani LLM</td>
-                        <td>
-                          <select data-pg-lat aria-label="Latency percentile for Gnani LLM">
-                            <option value="p50">p50</option>
-                            <option value="p95" selected>p95</option>
-                            <option value="p99">p99</option>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr data-provider-seed="llm-openai">
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="OpenAI on latency chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="OpenAI on volume chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="OpenAI on error chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="OpenAI on probe chart" /></td>
-                        <td class="sh-pg-pick-name">OpenAI</td>
-                        <td>
-                          <select data-pg-lat aria-label="Latency percentile for OpenAI">
-                            <option value="p50">p50</option>
-                            <option value="p95">p95</option>
-                            <option value="p99" selected>p99</option>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr data-provider-seed="llm-anthropic">
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Anthropic on latency chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Anthropic on volume chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Anthropic on error chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Anthropic on probe chart" /></td>
-                        <td class="sh-pg-pick-name">Anthropic</td>
-                        <td>
-                          <select data-pg-lat aria-label="Latency percentile for Anthropic">
-                            <option value="p50" selected>p50</option>
-                            <option value="p95">p95</option>
-                            <option value="p99">p99</option>
-                          </select>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div class="sh-four-metric-grid sh-pg-four-grid">
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Latency (one percentile per provider)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="lat">No providers selected for this chart (column L).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="lat"></canvas></div>
-                    </div>
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Volume (VPS)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="vps">No providers selected for this chart (column V).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="vps"></canvas></div>
-                    </div>
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Error rate (%)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="err">No providers selected for this chart (column E).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="err"></canvas></div>
-                    </div>
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Live probes (success %)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="probe">No providers selected for this chart (column P).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="probe"></canvas></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="sh-pr-table-head" aria-hidden="true">
-                  <span>Provider</span>
-                  <span>Routing &amp; breaker</span>
-                  <span>Err (5m)</span>
-                  <span>Load</span>
-                  <span>HB</span>
-                </div>
-                <div class="sh-pr-row" data-provider-seed="llm-gnani" data-threshold-ms="2000">
-                  <div class="sh-pr-cells">
-                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Gnani LLM</div>
-                    <div class="sh-pr-routing">
-                      <span class="sh-cb-pill sh-cb--open">Open</span>
-                      <span class="sh-flow-arrow">→</span>
-                      <span class="sh-flow-target">OpenAI</span>
-                      <span class="sh-flow-note">Active fallback</span>
-                    </div>
-                    <span class="sh-err-badge">3.8%</span>
-                    <span class="sh-rps">412 VPS</span>
-                    <span class="sh-hb sh-hb--bad" title="Heartbeat"><span class="sh-hb-dot"></span></span>
-                  </div>
-                </div>
-                <div class="sh-pr-row" data-provider-seed="llm-openai" data-threshold-ms="2000">
-                  <div class="sh-pr-cells">
-                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> OpenAI</div>
-                    <div class="sh-pr-routing">
-                      <span class="sh-cb-pill sh-cb--closed">Closed</span>
-                      <span class="sh-badge sh-badge--ok sh-flow-receiving">Primary load shifted here</span>
-                    </div>
-                    <span class="sh-err-badge">0.11%</span>
-                    <span class="sh-rps">318 VPS</span>
-                    <span class="sh-hb sh-hb--ok" title="Heartbeat"><span class="sh-hb-dot"></span></span>
-                  </div>
-                </div>
-                <div class="sh-pr-row" data-provider-seed="llm-anthropic" data-threshold-ms="2000">
-                  <div class="sh-pr-cells">
-                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Anthropic</div>
-                    <div class="sh-pr-routing">
-                      <span class="sh-cb-pill sh-cb--half">Half-open</span>
-                      <span class="sh-flow-note">Testing recovery path</span>
-                    </div>
-                    <span class="sh-err-badge">0.05%</span>
-                    <span class="sh-rps">44 VPS</span>
-                    <span class="sh-hb sh-hb--recover" title="Heartbeat"><span class="sh-hb-dot"></span></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="sh-pg" data-pg="tts">
-              <button type="button" class="sh-pg-toggle" aria-expanded="false" aria-controls="pg-body-tts" id="pg-btn-tts">
-                <span class="sh-pg-toggle-icon" aria-hidden="true">▸</span>
-                <span class="sh-comp-id">G7</span>
-                <span class="sh-pg-title">TTS — Operational (tail watch)</span>
-                <span class="sh-badge sh-badge--degraded">p99 elevated</span>
-                <span class="sh-pg-summary">Gnani TTS · Azure Neural · Google WaveNet</span>
-              </button>
-              <div class="sh-pg-body" id="pg-body-tts" hidden>
-                <div class="sh-pg-charts-block" data-pg-charts data-pg-threshold="1500">
-                  <p class="hint sh-pg-charts-hint">
-                    Shared charts — warning band on latency above <strong>1500 ms</strong> (TTS). Use L/V/E/P per provider as needed.
-                  </p>
-                  <table class="sh-pg-pick-table sh-comp-table">
-                    <thead>
-                      <tr>
-                        <th class="sh-pg-ch-h" scope="col" title="Latency chart">L</th>
-                        <th class="sh-pg-ch-h" scope="col" title="Volume chart">V</th>
-                        <th class="sh-pg-ch-h" scope="col" title="Error rate chart">E</th>
-                        <th class="sh-pg-ch-h" scope="col" title="Probe chart">P</th>
-                        <th scope="col">Provider</th>
-                        <th scope="col">Latency line</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr data-provider-seed="tts-gnani">
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Gnani TTS on latency chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Gnani TTS on volume chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Gnani TTS on error chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Gnani TTS on probe chart" /></td>
-                        <td class="sh-pg-pick-name">Gnani TTS</td>
-                        <td>
-                          <select data-pg-lat aria-label="Latency percentile for Gnani TTS">
-                            <option value="p50">p50</option>
-                            <option value="p95" selected>p95</option>
-                            <option value="p99">p99</option>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr data-provider-seed="tts-azure">
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Azure Neural TTS on latency chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Azure Neural TTS on volume chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Azure Neural TTS on error chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Azure Neural TTS on probe chart" /></td>
-                        <td class="sh-pg-pick-name">Azure Neural TTS</td>
-                        <td>
-                          <select data-pg-lat aria-label="Latency percentile for Azure Neural TTS">
-                            <option value="p50">p50</option>
-                            <option value="p95">p95</option>
-                            <option value="p99" selected>p99</option>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr data-provider-seed="tts-google">
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pl checked title="Plot on latency" aria-label="Google WaveNet on latency chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pv checked title="Plot on volume" aria-label="Google WaveNet on volume chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pe checked title="Plot on errors" aria-label="Google WaveNet on error chart" /></td>
-                        <td class="sh-pg-ch"><input type="checkbox" data-pg-pp checked title="Plot on probes" aria-label="Google WaveNet on probe chart" /></td>
-                        <td class="sh-pg-pick-name">Google WaveNet</td>
-                        <td>
-                          <select data-pg-lat aria-label="Latency percentile for Google WaveNet">
-                            <option value="p50" selected>p50</option>
-                            <option value="p95">p95</option>
-                            <option value="p99">p99</option>
-                          </select>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div class="sh-four-metric-grid sh-pg-four-grid">
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Latency (one percentile per provider)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="lat">No providers selected for this chart (column L).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="lat"></canvas></div>
-                    </div>
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Volume (RPS)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="vps">No providers selected for this chart (column V).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="vps"></canvas></div>
-                    </div>
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Error rate (%)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="err">No providers selected for this chart (column E).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="err"></canvas></div>
-                    </div>
-                    <div class="sh-metric-chart-box">
-                      <p class="sh-axis-label">Live probes (success %)</p>
-                      <p class="hint sh-pg-miss hidden" data-pg-miss="probe">No providers selected for this chart (column P).</p>
-                      <div class="sh-tel-chart-wrap"><canvas data-pg-chart="probe"></canvas></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="sh-pr-table-head" aria-hidden="true">
-                  <span>Provider</span>
-                  <span>Routing &amp; breaker</span>
-                  <span>Err (5m)</span>
-                  <span>Load</span>
-                  <span>HB</span>
-                </div>
-                <div class="sh-pr-row" data-provider-seed="tts-gnani" data-threshold-ms="1500">
-                  <div class="sh-pr-cells">
-                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Gnani TTS</div>
-                    <div class="sh-pr-routing">
-                      <span class="sh-cb-pill sh-cb--closed">Closed</span>
-                      <span class="sh-flow-note">Primary path</span>
-                    </div>
-                    <span class="sh-err-badge">0.18%</span>
-                    <span class="sh-rps">204 RPS</span>
-                    <span class="sh-hb sh-hb--warn" title="Heartbeat"><span class="sh-hb-dot"></span></span>
-                  </div>
-                </div>
-                <div class="sh-pr-row" data-provider-seed="tts-azure" data-threshold-ms="1500">
-                  <div class="sh-pr-cells">
-                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Azure Neural TTS</div>
-                    <div class="sh-pr-routing">
-                      <span class="sh-cb-pill sh-cb--open">Open</span>
-                      <span class="sh-flow-arrow">→</span>
-                      <span class="sh-flow-target">Google WaveNet</span>
-                      <span class="sh-flow-note">Active fallback</span>
-                    </div>
-                    <span class="sh-err-badge">0.00%</span>
-                    <span class="sh-rps">0 RPS</span>
-                    <span class="sh-hb sh-hb--ok" title="Heartbeat"><span class="sh-hb-dot"></span></span>
-                  </div>
-                </div>
-                <div class="sh-pr-row" data-provider-seed="tts-google" data-threshold-ms="1500">
-                  <div class="sh-pr-cells">
-                    <div class="sh-pr-name"><span class="sh-flow-icon">⎘</span> Google WaveNet</div>
-                    <div class="sh-pr-routing">
-                      <span class="sh-cb-pill sh-cb--closed">Closed</span>
-                      <span class="sh-badge sh-badge--ok sh-flow-receiving">Receiving shifted traffic</span>
-                    </div>
-                    <span class="sh-err-badge">0.31%</span>
-                    <span class="sh-rps">18 RPS</span>
-                    <span class="sh-hb sh-hb--recover" title="Heartbeat"><span class="sh-hb-dot"></span></span>
-                  </div>
-                </div>
-              </div>
+                  <tr class="sh-comp-meta-row" title="Aggregate across TTS providers">
+                    <td class="sh-comp-id-wrap">
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-pv-agg-G7" title="Show provider table">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle provider group</span>
+                      </button>
+                      <span class="sh-comp-id">G7</span>
+                    </td>
+                    <td>TTS (multi-provider)</td>
+                    <td>Speech synthesis; routing &amp; fallbacks</td>
+                    <td><span class="sh-badge sh-badge--degraded">Degraded</span></td>
+                    <td>98%</td>
+                    <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                  </tr>
+                  <tr class="sh-comp-charts-row" hidden id="sh-pv-agg-G7">
+                    <td colspan="6" class="sh-comp-charts-cell">
+                      <div class="sh-table-wrap">
+                        <table class="sh-comp-table sh-metrics-table">
+                          <thead>
+                            <tr>
+                              <th scope="col">ID</th>
+                              <th scope="col">Component</th>
+                              <th scope="col">Role</th>
+                              <th scope="col">Status</th>
+                              <th scope="col">5m probe</th>
+                              <th scope="col">Circuit</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr class="sh-comp-meta-row">
+                              <td class="sh-comp-id-wrap">
+                                <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-pv-tts-gnani" title="Show metrics charts">
+                                  <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
+                                </button>
+                                <span class="sh-comp-id">tts-gnani</span>
+                              </td>
+                              <td>Gnani TTS</td>
+                              <td>Primary synthesis</td>
+                              <td><span class="sh-badge sh-badge--degraded">Degraded</span></td>
+                              <td>95%</td>
+                              <td><span class="sh-cb-pill sh-cb--closed">Closed</span></td>
+                            </tr>
+                            <tr class="sh-comp-charts-row" hidden id="sh-charts-pv-tts-gnani">
+                              <td colspan="6" class="sh-comp-charts-cell">
+                                <div class="sh-four-metric-grid sh-comp-metrics-grid" data-provider-four="tts-gnani" data-pg-threshold="1500"></div>
+                              </td>
+                            </tr>
+                            <tr class="sh-comp-meta-row">
+                              <td class="sh-comp-id-wrap">
+                                <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-pv-tts-azure" title="Show metrics charts">
+                                  <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
+                                </button>
+                                <span class="sh-comp-id">tts-azure</span>
+                              </td>
+                              <td>Azure Neural TTS</td>
+                              <td>Regional fallback</td>
+                              <td><span class="sh-badge sh-badge--bad">Unhealthy</span></td>
+                              <td>88%</td>
+                              <td><span class="sh-cb-pill sh-cb--open">Open</span></td>
+                            </tr>
+                            <tr class="sh-comp-charts-row" hidden id="sh-charts-pv-tts-azure">
+                              <td colspan="6" class="sh-comp-charts-cell">
+                                <div class="sh-four-metric-grid sh-comp-metrics-grid" data-provider-four="tts-azure" data-pg-threshold="1500"></div>
+                              </td>
+                            </tr>
+                            <tr class="sh-comp-meta-row">
+                              <td class="sh-comp-id-wrap">
+                                <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-pv-tts-google" title="Show metrics charts">
+                                  <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
+                                </button>
+                                <span class="sh-comp-id">tts-google</span>
+                              </td>
+                              <td>Google WaveNet</td>
+                              <td>Secondary path</td>
+                              <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
+                              <td>99%</td>
+                              <td><span class="sh-cb-pill sh-cb--closed">Closed</span></td>
+                            </tr>
+                            <tr class="sh-comp-charts-row" hidden id="sh-charts-pv-tts-google">
+                              <td colspan="6" class="sh-comp-charts-cell">
+                                <div class="sh-four-metric-grid sh-comp-metrics-grid" data-provider-four="tts-google" data-pg-threshold="1500"></div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </section>
 
           <section class="card sh-section" aria-labelledby="sh-infra-heading">
             <h2 id="sh-infra-heading">Group 2 — Infrastructure (session &amp; async)</h2>
-            <p class="hint" style="margin: 0 0 0.75rem">Redis, queues, and workers — single stack (no nested providers). Use <strong>▾</strong> beside each ID to collapse that row’s charts.</p>
             <div class="sh-table-wrap">
               <table class="sh-comp-table sh-metrics-table">
                 <thead>
@@ -2865,8 +2784,8 @@
                 <tbody>
                   <tr class="sh-comp-meta-row" title="Pass: PING &lt; 5ms">
                     <td class="sh-comp-id-wrap">
-                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G8" title="Hide metrics charts">
-                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-G8" title="Show metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
                       </button>
                       <span class="sh-comp-id">G8</span>
                     </td>
@@ -2876,15 +2795,15 @@
                     <td>100%</td>
                     <td><span class="sh-gate sh-gate--open">⛩</span></td>
                   </tr>
-                  <tr class="sh-comp-charts-row" id="sh-charts-G8">
+                  <tr class="sh-comp-charts-row" hidden id="sh-charts-G8">
                     <td colspan="6" class="sh-comp-charts-cell">
                       <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G8"></div>
                     </td>
                   </tr>
                   <tr class="sh-comp-meta-row" title="Pass: queue depth &lt; threshold">
                     <td class="sh-comp-id-wrap">
-                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G9" title="Hide metrics charts">
-                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-G9" title="Show metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
                       </button>
                       <span class="sh-comp-id">G9</span>
                     </td>
@@ -2894,15 +2813,15 @@
                     <td>100%</td>
                     <td><span class="sh-gate sh-gate--open">⛩</span></td>
                   </tr>
-                  <tr class="sh-comp-charts-row" id="sh-charts-G9">
+                  <tr class="sh-comp-charts-row" hidden id="sh-charts-G9">
                     <td colspan="6" class="sh-comp-charts-cell">
                       <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G9"></div>
                     </td>
                   </tr>
                   <tr class="sh-comp-meta-row" title="Pass: worker heartbeat OK">
                     <td class="sh-comp-id-wrap">
-                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-G10" title="Hide metrics charts">
-                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-G10" title="Show metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
                       </button>
                       <span class="sh-comp-id">G10</span>
                     </td>
@@ -2912,7 +2831,7 @@
                     <td>100%</td>
                     <td><span class="sh-gate sh-gate--open">⛩</span></td>
                   </tr>
-                  <tr class="sh-comp-charts-row" id="sh-charts-G10">
+                  <tr class="sh-comp-charts-row" hidden id="sh-charts-G10">
                     <td colspan="6" class="sh-comp-charts-cell">
                       <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="G10"></div>
                     </td>
@@ -2924,9 +2843,8 @@
 
           <section class="card sh-section" aria-labelledby="sh-cust-heading">
             <h2 id="sh-cust-heading">Customer-configured endpoints (monitored)</h2>
-            <p class="hint" style="margin: 0 0 0.75rem">Same layout as Group 1 — <strong>▾</strong> toggles the chart block under each component.</p>
             <div class="sh-table-wrap">
-              <table class="sh-comp-table sh-metrics-table">
+              <table class="sh-comp-table sh-metrics-table sh-cust-metrics-table">
                 <thead>
                   <tr>
                     <th scope="col">ID</th>
@@ -2935,13 +2853,14 @@
                     <th scope="col">Status</th>
                     <th scope="col">5m probe</th>
                     <th scope="col">Circuit</th>
+                    <th scope="col">Error endpoints</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr class="sh-comp-meta-row" title="Pass: 200 with JSON &lt; 3s">
                     <td class="sh-comp-id-wrap">
-                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-C1" title="Hide metrics charts">
-                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-C1" title="Show metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
                       </button>
                       <span class="sh-comp-id">C1</span>
                     </td>
@@ -2950,16 +2869,19 @@
                     <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
                     <td>100%</td>
                     <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                    <td>
+                      <button type="button" class="btn-secondary btn-small" data-cust-error-modal="C1">View error endpoints</button>
+                    </td>
                   </tr>
-                  <tr class="sh-comp-charts-row" id="sh-charts-C1">
-                    <td colspan="6" class="sh-comp-charts-cell">
+                  <tr class="sh-comp-charts-row" hidden id="sh-charts-C1">
+                    <td colspan="7" class="sh-comp-charts-cell">
                       <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="C1"></div>
                     </td>
                   </tr>
                   <tr class="sh-comp-meta-row" title="Pass: tool schema valid">
                     <td class="sh-comp-id-wrap">
-                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-C2" title="Hide metrics charts">
-                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-C2" title="Show metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
                       </button>
                       <span class="sh-comp-id">C2</span>
                     </td>
@@ -2968,16 +2890,19 @@
                     <td><span class="sh-badge sh-badge--ok">Healthy</span></td>
                     <td>100%</td>
                     <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                    <td>
+                      <button type="button" class="btn-secondary btn-small" data-cust-error-modal="C2">View error endpoints</button>
+                    </td>
                   </tr>
-                  <tr class="sh-comp-charts-row" id="sh-charts-C2">
-                    <td colspan="6" class="sh-comp-charts-cell">
+                  <tr class="sh-comp-charts-row" hidden id="sh-charts-C2">
+                    <td colspan="7" class="sh-comp-charts-cell">
                       <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="C2"></div>
                     </td>
                   </tr>
                   <tr class="sh-comp-meta-row" title="Elevated delivery failures">
                     <td class="sh-comp-id-wrap">
-                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="true" aria-controls="sh-charts-C3" title="Hide metrics charts">
-                        <span class="sh-comp-toggle-icon" aria-hidden="true">▾</span><span class="sh-sr-only">Toggle charts</span>
+                      <button type="button" class="sh-comp-chart-toggle" aria-expanded="false" aria-controls="sh-charts-C3" title="Show metrics charts">
+                        <span class="sh-comp-toggle-icon" aria-hidden="true">▸</span><span class="sh-sr-only">Toggle charts</span>
                       </button>
                       <span class="sh-comp-id">C3</span>
                     </td>
@@ -2986,9 +2911,12 @@
                     <td><span class="sh-badge sh-badge--degraded">Degraded</span></td>
                     <td>88%</td>
                     <td><span class="sh-gate sh-gate--open">⛩</span></td>
+                    <td>
+                      <button type="button" class="btn-secondary btn-small" data-cust-error-modal="C3">View error endpoints</button>
+                    </td>
                   </tr>
-                  <tr class="sh-comp-charts-row" id="sh-charts-C3">
-                    <td colspan="6" class="sh-comp-charts-cell">
+                  <tr class="sh-comp-charts-row" hidden id="sh-charts-C3">
+                    <td colspan="7" class="sh-comp-charts-cell">
                       <div class="sh-four-metric-grid sh-comp-metrics-grid" data-comp-four="C3"></div>
                     </td>
                   </tr>
@@ -2996,6 +2924,31 @@
               </table>
             </div>
           </section>
+
+          <dialog id="sh-cust-endpoints-dialog" class="sh-cust-dialog" aria-labelledby="sh-cust-dialog-title">
+            <div class="sh-cust-dialog-panel">
+              <div class="sh-cust-dialog-head">
+                <h3 id="sh-cust-dialog-title"></h3>
+                <button type="button" class="sh-cust-dialog-x" id="sh-cust-dialog-close" aria-label="Close dialog">×</button>
+              </div>
+              <p class="hint sh-cust-dialog-lead" id="sh-cust-dialog-lead"></p>
+              <div class="sh-table-wrap sh-cust-dialog-table-wrap" id="sh-cust-dialog-table-wrap">
+                <table class="sh-data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">API endpoint</th>
+                      <th scope="col">Bot name</th>
+                      <th scope="col">Error rate</th>
+                      <th scope="col">Latency</th>
+                      <th scope="col">Circuit</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sh-cust-dialog-tbody"></tbody>
+                </table>
+              </div>
+              <p class="hint hidden" id="sh-cust-dialog-empty"></p>
+            </div>
+          </dialog>
 
           </div>
 
@@ -3029,6 +2982,63 @@
                     <td>18 min</td>
                     <td>G3</td>
                     <td>ARI reconnect storm after carrier flap; no customer data loss.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card sh-section" aria-labelledby="sh-rogue-heading">
+            <h2 id="sh-rogue-heading">Rogue Bot Monitor</h2>
+            <p class="hint" style="margin-top: 0">2 bots currently restricted</p>
+            <div class="sh-table-wrap">
+              <table class="sh-data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Bot ID</th>
+                    <th scope="col">Bot Name</th>
+                    <th scope="col">Org</th>
+                    <th scope="col">State</th>
+                    <th scope="col">Token Throughput</th>
+                    <th scope="col">Prompt Tokens</th>
+                    <th scope="col">KV Cache Hit Rate</th>
+                    <th scope="col">Since</th>
+                    <th scope="col">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="sh-comp-id">sales-outbound-v2</span></td>
+                    <td>Sales Outbound v2</td>
+                    <td>Acme Corp</td>
+                    <td><span class="sh-badge sh-badge--bad">Hard Capped</span></td>
+                    <td><span class="pct-cell low">11</span> tok/s</td>
+                    <td><span class="pct-cell low">6240</span></td>
+                    <td><span class="pct-cell low">8%</span></td>
+                    <td>47 min ago</td>
+                    <td><button type="button" class="btn-secondary btn-small">Lift Restriction</button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="sh-comp-id">support-inbound</span></td>
+                    <td>Support Inbound</td>
+                    <td>RetailCo</td>
+                    <td><span class="sh-badge sh-badge--degraded">Throttled</span></td>
+                    <td><span class="pct-cell low">16</span> tok/s</td>
+                    <td><span class="pct-cell low">4380</span></td>
+                    <td><span class="pct-cell low">14%</span></td>
+                    <td>12 min ago</td>
+                    <td><button type="button" class="btn-secondary btn-small">Lift Restriction</button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="sh-comp-id">demo-bot-01</span></td>
+                    <td>Demo Bot 01</td>
+                    <td>Internal</td>
+                    <td><span class="sh-badge sh-badge--ok">Normal</span></td>
+                    <td><span class="pct-cell good">34</span> tok/s</td>
+                    <td><span class="pct-cell good">1200</span></td>
+                    <td><span class="pct-cell good">68%</span></td>
+                    <td>—</td>
+                    <td><button type="button" class="btn-secondary btn-small" disabled>Lift Restriction</button></td>
                   </tr>
                 </tbody>
               </table>
@@ -3223,6 +3233,8 @@
         }
         if (isHealth) {
           initHealthDashboard();
+        } else {
+          shStopHealthLiveTick();
         }
       }
 
@@ -3242,15 +3254,19 @@
         return t ? t.getAttribute("data-region") || "all" : "all";
       }
 
-      function metricBundle5Min(seedStr, regionOff) {
+      var shHealthDataTick = 0;
+      var shHealthDataTimer = null;
+
+      function metricBundle5Min(seedStr, regionOff, tick) {
+        var tk = tick == null || tick === undefined ? 0 : Number(tick) || 0;
         const labels = ["-5m", "-4m", "-3m", "-2m", "-1m", "now"];
-        const base = simpleHash("pulse" + seedStr + String(regionOff));
+        const base = simpleHash("pulse" + seedStr + String(regionOff) + "|tk" + tk);
         function wave(off, mag) {
           return labels.map(function (_, i) {
             return (
               220 +
               mag * Math.sin((i + off + (base % 7)) * 0.85) +
-              (simpleHash(seedStr + "p" + i + off + regionOff) % 35)
+              (simpleHash(seedStr + "p" + i + off + regionOff + "|tk" + tk) % 35)
             );
           });
         }
@@ -3260,18 +3276,19 @@
           p95: wave(1, 28),
           p99: wave(2, 55),
           vps: labels.map(function (_, i) {
-            return 80 + (simpleHash(seedStr + "v" + i + regionOff) % 220);
+            return 80 + (simpleHash(seedStr + "v" + i + regionOff + "|tk" + tk) % 220);
           }),
           err: labels.map(function (_, i) {
-            return Math.min(2.5, ((simpleHash(seedStr + "e" + i + regionOff) % 25) / 10));
+            return Math.min(2.5, ((simpleHash(seedStr + "e" + i + regionOff + "|tk" + tk) % 25) / 10));
           }),
           probe: labels.map(function (_, i) {
-            return Math.min(100, 72 + (simpleHash(seedStr + "pr" + i + regionOff) % 28));
+            return Math.min(100, 72 + (simpleHash(seedStr + "pr" + i + regionOff + "|tk" + tk) % 28));
           }),
         };
       }
 
-      function metricBundle60m(seed, regionOff) {
+      function metricBundle60m(seed, regionOff, tick) {
+        var tk = tick == null || tick === undefined ? 0 : Number(tick) || 0;
         const n = 60;
         const labels = [];
         for (let i = n - 1; i >= 0; i--) labels.push("-" + i + "m");
@@ -3284,18 +3301,18 @@
         const probe = [];
         for (let i = 0; i < n; i++) {
           p50.push(
-            thr * (0.25 + 0.08 * Math.sin(i * 0.11)) + (simpleHash(seed + "a" + i + regionOff) % 90)
+            thr * (0.25 + 0.08 * Math.sin(i * 0.11)) + (simpleHash(seed + "a" + i + regionOff + "|tk" + tk) % 90)
           );
           p95.push(
-            thr * (0.5 + 0.12 * Math.sin(i * 0.09 + 1)) + (simpleHash(seed + "b" + i + regionOff) % 120)
+            thr * (0.5 + 0.12 * Math.sin(i * 0.09 + 1)) + (simpleHash(seed + "b" + i + regionOff + "|tk" + tk) % 120)
           );
           let p99v =
-            thr * (0.75 + 0.14 * Math.sin(i * 0.08 + 2)) + (simpleHash(seed + "c" + i + regionOff) % 150);
+            thr * (0.75 + 0.14 * Math.sin(i * 0.08 + 2)) + (simpleHash(seed + "c" + i + regionOff + "|tk" + tk) % 150);
           if (i > 38 && i < 52) p99v *= 1.12;
           p99.push(p99v);
-          vps.push(80 + (simpleHash(seed + "v" + i + regionOff) % 420));
-          err.push(Math.min(4, (simpleHash(seed + "e" + i + regionOff) % 45) / 10));
-          probe.push(Math.min(100, 58 + (simpleHash(seed + "pb" + i + regionOff) % 42)));
+          vps.push(80 + (simpleHash(seed + "v" + i + regionOff + "|tk" + tk) % 420));
+          err.push(Math.min(4, (simpleHash(seed + "e" + i + regionOff + "|tk" + tk) % 45) / 10));
+          probe.push(Math.min(100, 58 + (simpleHash(seed + "pb" + i + regionOff + "|tk" + tk) % 42)));
         }
         return { labels: labels, p50: p50, p95: p95, p99: p99, vps: vps, err: err, probe: probe };
       }
@@ -3318,6 +3335,207 @@
           },
           y: yScale,
         };
+      }
+
+      var SH_SLO_ERR_PCT = 0.01;
+      var SH_SLO_PROBE_PCT = 99.99;
+      var SH_SLO_LAT_COMPONENT_MS = 500;
+      var __shPluginSeq = 0;
+      function shNextPluginId(prefix) {
+        __shPluginSeq += 1;
+        return String(prefix) + "_" + __shPluginSeq;
+      }
+
+      function shMean(arr) {
+        if (!arr.length) return 0;
+        return arr.reduce(function (a, b) {
+          return a + b;
+        }, 0) / arr.length;
+      }
+      function shStdev(arr) {
+        if (arr.length < 2) return 0;
+        var m = shMean(arr);
+        return Math.sqrt(
+          arr.reduce(function (s, x) {
+            return s + (x - m) * (x - m);
+          }, 0) / arr.length
+        );
+      }
+      function shRollingSigmaBand(series) {
+        var lower = [];
+        var upper = [];
+        var n = series.length;
+        for (var i = 0; i < n; i++) {
+          var w = series.slice(Math.max(0, i - 6), i + 1);
+          var mu = shMean(w);
+          var sig = shStdev(w);
+          lower.push(Math.max(0, mu - sig));
+          upper.push(mu + sig);
+        }
+        return { lower: lower, upper: upper };
+      }
+      function shWowGhostFromVps(vps, phase) {
+        var ph = phase == null ? 1.15 : phase;
+        return vps.map(function (v, i) {
+          var osc = 0.925 + 0.1 * Math.sin(i * 0.27 + ph);
+          var raw = v * osc;
+          return Math.min(v * 1.1, Math.max(v * 0.85, raw));
+        });
+      }
+      function shCombinedMaxPerIndex(datasets, len) {
+        var out = [];
+        for (var i = 0; i < len; i++) {
+          var m = -Infinity;
+          datasets.forEach(function (ds) {
+            m = Math.max(m, ds.data[i]);
+          });
+          out.push(m);
+        }
+        return out;
+      }
+      function shSloErrorFillPlugin() {
+        var pid = shNextPluginId("shSloErrFill");
+        return {
+          id: pid,
+          beforeDatasetsDraw: function (chart) {
+            var yScale = chart.scales.y;
+            var area = chart.chartArea;
+            if (!yScale || !area) return;
+            var ySlo = yScale.getPixelForValue(SH_SLO_ERR_PCT);
+            if (ySlo <= area.top) return;
+            var ctx = chart.ctx;
+            ctx.save();
+            ctx.fillStyle = "rgba(239, 68, 68, 0.14)";
+            ctx.fillRect(area.left, area.top, area.right - area.left, ySlo - area.top);
+            ctx.restore();
+          },
+        };
+      }
+      function shSloProbeFillPlugin() {
+        var pid = shNextPluginId("shSloPrbFill");
+        return {
+          id: pid,
+          beforeDatasetsDraw: function (chart) {
+            var yScale = chart.scales.y;
+            var area = chart.chartArea;
+            if (!yScale || !area) return;
+            var ySlo = yScale.getPixelForValue(SH_SLO_PROBE_PCT);
+            if (ySlo >= area.bottom) return;
+            var ctx = chart.ctx;
+            ctx.save();
+            ctx.fillStyle = "rgba(239, 68, 68, 0.12)";
+            ctx.fillRect(area.left, ySlo, area.right - area.left, area.bottom - ySlo);
+            ctx.restore();
+          },
+        };
+      }
+      function shLegendFilterHideSigmaHi(datasets) {
+        return function (legendItem) {
+          var idx = legendItem.datasetIndex;
+          if (idx == null || idx < 0) return true;
+          var ds = datasets[idx];
+          if (ds && ds._shSigmaHi) return false;
+          return true;
+        };
+      }
+      function shErrDataBreached(chart) {
+        var dss = chart.data.datasets;
+        for (var i = 0; i < dss.length; i++) {
+          var ds = dss[i];
+          if (!ds || !ds.data || ds.label === "SLO limit") continue;
+          for (var j = 0; j < ds.data.length; j++) {
+            if (Number(ds.data[j]) > 0) return true;
+          }
+        }
+        return false;
+      }
+      function shProbeDataBreached(chart) {
+        var dss = chart.data.datasets;
+        for (var i = 0; i < dss.length; i++) {
+          var ds = dss[i];
+          if (!ds || !ds.data || ds.label === "SLO floor") continue;
+          for (var j = 0; j < ds.data.length; j++) {
+            if (Number(ds.data[j]) < 100) return true;
+          }
+        }
+        return false;
+      }
+      function shLatencyDataBreached(chart, sloMs) {
+        var thr = Number(sloMs);
+        if (isNaN(thr)) thr = 500;
+        var dss = chart.data.datasets;
+        for (var i = 0; i < dss.length; i++) {
+          var ds = dss[i];
+          if (!ds || !ds.data || !ds.data.length) continue;
+          if (ds.label === "SLO" || ds.label === "Normal range" || ds._shSigmaHi) continue;
+          for (var j = 0; j < ds.data.length; j++) {
+            var v = Number(ds.data[j]);
+            if (!isNaN(v) && v > thr) return true;
+          }
+        }
+        return false;
+      }
+      function shLatencyBreachFn(sloMs) {
+        return function (chart) {
+          return shLatencyDataBreached(chart, sloMs);
+        };
+      }
+      function shBreachBackgroundPlugin(breachFn) {
+        var pid = shNextPluginId("shBrBg");
+        return {
+          id: pid,
+          beforeDatasetsDraw: function (chart) {
+            var area = chart.chartArea;
+            if (!area || area.right <= area.left || area.bottom <= area.top) return;
+            if (!breachFn(chart)) return;
+            var ctx = chart.ctx;
+            ctx.save();
+            ctx.fillStyle = "#ff000015";
+            ctx.fillRect(area.left, area.top, area.right - area.left, area.bottom - area.top);
+            ctx.restore();
+          },
+        };
+      }
+      function shLatencySloDataset(labels, sloMs) {
+        return {
+          label: "SLO",
+          data: labels.map(function () {
+            return sloMs;
+          }),
+          borderColor: "#f97316",
+          borderDash: [6, 4],
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0,
+          order: 100,
+        };
+      }
+      function shSigmaFillDatasets(labels, lower, upper) {
+        return [
+          {
+            label: "Normal range",
+            data: lower,
+            borderColor: "rgba(56, 189, 248, 0.35)",
+            backgroundColor: "rgba(147, 197, 253, 0.22)",
+            borderWidth: 1,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.2,
+            order: 0,
+          },
+          {
+            label: "",
+            _shSigmaHi: true,
+            data: upper,
+            borderColor: "transparent",
+            backgroundColor: "rgba(147, 197, 253, 0.22)",
+            borderWidth: 0,
+            fill: "-1",
+            pointRadius: 0,
+            tension: 0.2,
+            order: 0,
+          },
+        ];
       }
 
       var SH_HERO_COMP_IDS = ["G1", "G2", "G3", "G4", "G8", "G9", "G10", "C1", "C2", "C3"];
@@ -3347,7 +3565,7 @@
         }
         const alerts = [];
         SH_HERO_COMP_IDS.forEach(function (cid) {
-          const b = metricBundle5Min("comp" + cid, off);
+          const b = metricBundle5Min("comp" + cid, off, shHealthDataTick);
           const le = last(b.err);
           const lp = last(b.probe);
           const p99 = last(b.p99);
@@ -3389,14 +3607,14 @@
         });
         if (alerts.length === 0) {
           hero.classList.add("sh-hero--ok");
-          titleEl.textContent = "No threshold breaches in demo series";
+          titleEl.textContent = "All Systems Operational";
           subEl.textContent =
-            "Charts default to expanded — use ▾ beside each ID to hide that component’s 2×2 grid. Switch region to see how the same seeds shift.";
+            "Probe cadence 15–30s · Chart resolution 60s · Per-component grids start collapsed — expand with ▸ beside each ID. Switch region to see how the same seeds shift.";
           listEl.hidden = true;
           return;
         }
         hero.classList.add(hasErr ? "sh-hero--bad" : "sh-hero--warn");
-        titleEl.textContent = hasErr ? "Errors in current demo window" : "Warnings in current demo window";
+        titleEl.textContent = hasErr ? "Platform Outage" : "Platform Degraded";
         subEl.textContent =
           "Aligned with the per-component graphs below (same generated series). Resolve in your telemetry backend for production.";
         listEl.hidden = false;
@@ -3412,7 +3630,7 @@
         if (typeof Chart === "undefined") return;
         const compId = wrap.getAttribute("data-comp-four");
         const off = { all: 0, north: 3, south: 7, west: 11 }[regionKey] || 0;
-        const b = metricBundle5Min("comp" + compId, off);
+        const b = metricBundle5Min("comp" + compId, off, shHealthDataTick);
         const compact = false;
         const xTime = "Time (60s buckets, last 5 min)";
         wrap.querySelectorAll("canvas[data-comp-role]").forEach(function (canvas) {
@@ -3422,29 +3640,75 @@
           }
           const role = canvas.getAttribute("data-comp-role");
           if (role === "lat") {
+            var sigLat = shRollingSigmaBand(b.p99);
+            var latDs = shSigmaFillDatasets(b.labels, sigLat.lower, sigLat.upper).concat([
+              {
+                label: "p50 (ms)",
+                data: b.p50,
+                borderColor: "#38bdf8",
+                tension: 0.3,
+                pointRadius: 2,
+                borderWidth: 2,
+                order: 2,
+              },
+              {
+                label: "p95 (ms)",
+                data: b.p95,
+                borderColor: "#a78bfa",
+                borderDash: [6, 4],
+                tension: 0.3,
+                pointRadius: 0,
+                borderWidth: 2,
+                order: 2,
+              },
+              {
+                label: "p99 (ms)",
+                data: b.p99,
+                borderColor: "#f472b6",
+                borderDash: [2, 2],
+                tension: 0.3,
+                pointRadius: 0,
+                borderWidth: 2,
+                order: 2,
+              },
+              shLatencySloDataset(b.labels, SH_SLO_LAT_COMPONENT_MS),
+            ]);
             canvas._shChart = new Chart(canvas.getContext("2d"), {
               type: "line",
-              data: {
-                labels: b.labels,
-                datasets: [
-                  { label: "p50 (ms)", data: b.p50, borderColor: "#38bdf8", tension: 0.3, pointRadius: 2, borderWidth: 2 },
-                  { label: "p95 (ms)", data: b.p95, borderColor: "#a78bfa", borderDash: [6, 4], tension: 0.3, pointRadius: 0, borderWidth: 2 },
-                  { label: "p99 (ms)", data: b.p99, borderColor: "#f472b6", borderDash: [2, 2], tension: 0.3, pointRadius: 0, borderWidth: 2 },
-                ],
-              },
+              plugins: [shBreachBackgroundPlugin(shLatencyBreachFn(SH_SLO_LAT_COMPONENT_MS))],
+              data: { labels: b.labels, datasets: latDs },
               options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: "#8b9cb3", boxWidth: 12 } } },
+                plugins: {
+                  legend: {
+                    labels: {
+                      color: "#8b9cb3",
+                      boxWidth: 12,
+                      filter: shLegendFilterHideSigmaHi(latDs),
+                    },
+                  },
+                },
                 scales: chartAxisOpts(compact, xTime, "Latency (ms)"),
               },
             });
           } else if (role === "vps") {
+            var wowComp = shWowGhostFromVps(b.vps, simpleHash("wow" + compId + String(off)) * 0.01);
             canvas._shChart = new Chart(canvas.getContext("2d"), {
               type: "line",
               data: {
                 labels: b.labels,
                 datasets: [
+                  {
+                    label: "WoW",
+                    data: wowComp,
+                    borderColor: "#94a3b8",
+                    borderDash: [6, 4],
+                    tension: 0.3,
+                    pointRadius: 0,
+                    borderWidth: 1.5,
+                    order: -1,
+                  },
                   {
                     label: "VPS",
                     data: b.vps,
@@ -3453,41 +3717,86 @@
                     tension: 0.3,
                     pointRadius: 2,
                     borderWidth: 2,
+                    order: 2,
                   },
                 ],
               },
               options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { legend: { labels: { color: "#8b9cb3", boxWidth: 12 } } },
                 scales: chartAxisOpts(compact, xTime, "Volume (requests / sec)"),
               },
             });
           } else if (role === "err") {
             canvas._shChart = new Chart(canvas.getContext("2d"), {
               type: "line",
+              plugins: [shBreachBackgroundPlugin(shErrDataBreached), shSloErrorFillPlugin()],
               data: {
                 labels: b.labels,
-                datasets: [{ label: "Error %", data: b.err, borderColor: "#f59e0b", tension: 0.3, pointRadius: 2, borderWidth: 2 }],
+                datasets: [
+                  {
+                    label: "Error %",
+                    data: b.err,
+                    borderColor: "#f59e0b",
+                    tension: 0.3,
+                    pointRadius: 2,
+                    borderWidth: 2,
+                    order: 2,
+                  },
+                  {
+                    label: "SLO limit",
+                    data: b.labels.map(function () {
+                      return SH_SLO_ERR_PCT;
+                    }),
+                    borderColor: "#ef4444",
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0,
+                    order: 100,
+                  },
+                ],
               },
               options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { legend: { labels: { color: "#8b9cb3", boxWidth: 12 } } },
                 scales: chartAxisOpts(compact, xTime, "Error rate (%)", 0),
               },
             });
           } else if (role === "probe") {
             canvas._shChart = new Chart(canvas.getContext("2d"), {
               type: "line",
+              plugins: [shBreachBackgroundPlugin(shProbeDataBreached), shSloProbeFillPlugin()],
               data: {
                 labels: b.labels,
-                datasets: [{ label: "Probe success", data: b.probe, borderColor: "#22c55e", tension: 0.3, pointRadius: 2, borderWidth: 2 }],
+                datasets: [
+                  {
+                    label: "Probe success",
+                    data: b.probe,
+                    borderColor: "#22c55e",
+                    tension: 0.3,
+                    pointRadius: 2,
+                    borderWidth: 2,
+                    order: 2,
+                  },
+                  {
+                    label: "SLO floor",
+                    data: b.labels.map(function () {
+                      return SH_SLO_PROBE_PCT;
+                    }),
+                    borderColor: "#ef4444",
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0,
+                    order: 100,
+                  },
+                ],
               },
               options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { legend: { labels: { color: "#8b9cb3", boxWidth: 12 } } },
                 scales: chartAxisOpts(compact, xTime, "Rolling probe success (%)", 0, 100),
               },
             });
@@ -3524,6 +3833,219 @@
         wrap.dataset.fourReady = "1";
       }
 
+      function ensureProviderFourStructure(wrap) {
+        if (!wrap || wrap.dataset.providerFourReady === "1") return;
+        const pid = wrap.getAttribute("data-provider-four");
+        const labels = [
+          "Latency — p50 / p95 / p99 (ms)",
+          "Volume (VPS)",
+          "Error rate (4xx/5xx %)",
+          "Live probes (success %)",
+        ];
+        const roles = ["lat", "vps", "err", "probe"];
+        for (let i = 0; i < 4; i++) {
+          const box = document.createElement("div");
+          box.className = "sh-metric-chart-box";
+          const lp = document.createElement("p");
+          lp.className = "sh-axis-label";
+          lp.textContent = labels[i];
+          const mw = document.createElement("div");
+          mw.className = "sh-tel-chart-wrap";
+          const canvas = document.createElement("canvas");
+          canvas.setAttribute("data-provider-role", roles[i]);
+          canvas.setAttribute("data-provider-id", pid);
+          mw.appendChild(canvas);
+          box.appendChild(lp);
+          box.appendChild(mw);
+          wrap.appendChild(box);
+        }
+        wrap.dataset.providerFourReady = "1";
+      }
+
+      function buildProviderFourCharts(wrap, regionKey) {
+        if (typeof Chart === "undefined") return;
+        const seed = wrap.getAttribute("data-provider-four");
+        if (!seed) return;
+        const thr = parseInt(wrap.getAttribute("data-pg-threshold"), 10) || 3000;
+        const off = { all: 0, north: 3, south: 7, west: 11 }[regionKey] || 0;
+        const b = metricBundle60m(seed + "|" + off, off, shHealthDataTick);
+        const compact = false;
+        const xTime = "Time (min ago)";
+        wrap.querySelectorAll("canvas[data-provider-role]").forEach(function (canvas) {
+          if (canvas._shChart) {
+            canvas._shChart.destroy();
+            canvas._shChart = null;
+          }
+          const role = canvas.getAttribute("data-provider-role");
+          if (role === "lat") {
+            var sigPv = shRollingSigmaBand(b.p99);
+            var latPvDs = shSigmaFillDatasets(b.labels, sigPv.lower, sigPv.upper).concat([
+              {
+                label: "p50 (ms)",
+                data: b.p50,
+                borderColor: "#38bdf8",
+                tension: 0.2,
+                pointRadius: 0,
+                borderWidth: 2,
+                order: 2,
+              },
+              {
+                label: "p95 (ms)",
+                data: b.p95,
+                borderColor: "#a78bfa",
+                borderDash: [6, 4],
+                tension: 0.2,
+                pointRadius: 0,
+                borderWidth: 2,
+                order: 2,
+              },
+              {
+                label: "p99 (ms)",
+                data: b.p99,
+                borderColor: "#f472b6",
+                borderDash: [2, 2],
+                tension: 0.2,
+                pointRadius: 0,
+                borderWidth: 2,
+                order: 2,
+              },
+              shLatencySloDataset(b.labels, thr),
+            ]);
+            canvas._shChart = new Chart(canvas.getContext("2d"), {
+              type: "line",
+              plugins: [shBreachBackgroundPlugin(shLatencyBreachFn(thr))],
+              data: { labels: b.labels, datasets: latPvDs },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: "index", intersect: false },
+                plugins: {
+                  legend: {
+                    labels: {
+                      color: "#8b9cb3",
+                      boxWidth: 10,
+                      filter: shLegendFilterHideSigmaHi(latPvDs),
+                    },
+                  },
+                },
+                scales: chartAxisOpts(compact, xTime, "Latency (ms)"),
+              },
+            });
+          } else if (role === "vps") {
+            var wowPv = shWowGhostFromVps(b.vps, simpleHash("wowpv" + seed + String(off)) * 0.01);
+            canvas._shChart = new Chart(canvas.getContext("2d"), {
+              type: "line",
+              data: {
+                labels: b.labels,
+                datasets: [
+                  {
+                    label: "WoW",
+                    data: wowPv,
+                    borderColor: "#94a3b8",
+                    borderDash: [6, 4],
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 1.5,
+                    order: -1,
+                  },
+                  {
+                    label: "VPS",
+                    data: b.vps,
+                    borderColor: "#38bdf8",
+                    backgroundColor: "rgba(56,189,248,0.08)",
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 2,
+                    order: 2,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: "index", intersect: false },
+                plugins: { legend: { labels: { color: "#8b9cb3", boxWidth: 10 } } },
+                scales: chartAxisOpts(compact, xTime, "Volume (requests / sec)"),
+              },
+            });
+          } else if (role === "err") {
+            canvas._shChart = new Chart(canvas.getContext("2d"), {
+              type: "line",
+              plugins: [shBreachBackgroundPlugin(shErrDataBreached), shSloErrorFillPlugin()],
+              data: {
+                labels: b.labels,
+                datasets: [
+                  {
+                    label: "Error %",
+                    data: b.err,
+                    borderColor: "#f59e0b",
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 2,
+                    order: 2,
+                  },
+                  {
+                    label: "SLO limit",
+                    data: b.labels.map(function () {
+                      return SH_SLO_ERR_PCT;
+                    }),
+                    borderColor: "#ef4444",
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0,
+                    order: 100,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: "index", intersect: false },
+                plugins: { legend: { labels: { color: "#8b9cb3", boxWidth: 10 } } },
+                scales: chartAxisOpts(compact, xTime, "Error rate (%)", 0),
+              },
+            });
+          } else if (role === "probe") {
+            canvas._shChart = new Chart(canvas.getContext("2d"), {
+              type: "line",
+              plugins: [shBreachBackgroundPlugin(shProbeDataBreached), shSloProbeFillPlugin()],
+              data: {
+                labels: b.labels,
+                datasets: [
+                  {
+                    label: "Probe success",
+                    data: b.probe,
+                    borderColor: "#22c55e",
+                    tension: 0.2,
+                    pointRadius: 0,
+                    borderWidth: 2,
+                    order: 2,
+                  },
+                  {
+                    label: "SLO floor",
+                    data: b.labels.map(function () {
+                      return SH_SLO_PROBE_PCT;
+                    }),
+                    borderColor: "#ef4444",
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0,
+                    order: 100,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: "index", intersect: false },
+                plugins: { legend: { labels: { color: "#8b9cb3", boxWidth: 10 } } },
+                scales: chartAxisOpts(compact, xTime, "Rolling probe success (%)", 0, 100),
+              },
+            });
+          }
+        });
+      }
+
       function initComponentFourCharts(regionKey) {
         document.querySelectorAll("[data-comp-four]").forEach(function (wrap) {
           ensureCompFourStructure(wrap);
@@ -3531,247 +4053,34 @@
         });
       }
 
-      var PG_LINE_STYLES = [
-        { color: "#38bdf8", dash: [] },
-        { color: "#a78bfa", dash: [6, 4] },
-        { color: "#f472b6", dash: [3, 3] },
-        { color: "#fbbf24", dash: [8, 4] },
-        { color: "#34d399", dash: [2, 2] },
-        { color: "#94a3b8", dash: [10, 3, 2, 3] },
-      ];
-
-      function destroyPgChartsInBlock(block) {
-        if (!block) return;
-        block.querySelectorAll("canvas[data-pg-chart]").forEach(function (cv) {
-          if (cv._shChart) {
-            cv._shChart.destroy();
-            cv._shChart = null;
-          }
+      function initProviderFourCharts(regionKey) {
+        document.querySelectorAll("[data-provider-four]").forEach(function (wrap) {
+          ensureProviderFourStructure(wrap);
+          buildProviderFourCharts(wrap, regionKey);
         });
       }
 
-      function setPgMetricEmpty(block, chartKey, empty) {
-        const miss = block.querySelector('[data-pg-miss="' + chartKey + '"]');
-        const canvas = block.querySelector('canvas[data-pg-chart="' + chartKey + '"]');
-        const wrap = canvas ? canvas.closest(".sh-tel-chart-wrap") : null;
-        if (miss) miss.classList.toggle("hidden", !empty);
-        if (wrap) wrap.classList.toggle("hidden", empty);
+      function shStopHealthLiveTick() {
+        if (shHealthDataTimer) {
+          clearInterval(shHealthDataTimer);
+          shHealthDataTimer = null;
+        }
       }
-
-      function buildPgChartsInBlock(block, regionKey) {
-        if (typeof Chart === "undefined" || !block) return;
-        destroyPgChartsInBlock(block);
-        block.querySelectorAll(".sh-pg-empty-hint").forEach(function (n) {
-          n.remove();
+      function refreshHealthChartsForLiveData() {
+        var vh = el("view-health");
+        if (!vh || vh.classList.contains("hidden")) return;
+        shHealthDataTick++;
+        var reg = getHealthRegion();
+        document.querySelectorAll("[data-comp-four]").forEach(function (wrap) {
+          ensureCompFourStructure(wrap);
+          buildComponentCharts(wrap, reg);
         });
-        const off = { all: 0, north: 3, south: 7, west: 11 }[regionKey] || 0;
-        const thr = parseInt(block.getAttribute("data-pg-threshold"), 10) || 3000;
-        const rows = block.querySelectorAll(".sh-pg-pick-table tbody tr[data-provider-seed]");
-        const compact = false;
-        const xTitle = "Time (min ago)";
-        const latD = [];
-        const volD = [];
-        const errD = [];
-        const probD = [];
-        var labels = null;
-        for (let r = 0; r < rows.length; r++) {
-          const row = rows[r];
-          const seed = row.getAttribute("data-provider-seed");
-          const pl = row.querySelector("[data-pg-pl]");
-          const pv = row.querySelector("[data-pg-pv]");
-          const pe = row.querySelector("[data-pg-pe]");
-          const pp = row.querySelector("[data-pg-pp]");
-          if (!pl || !pv || !pe || !pp) continue;
-          const nameEl = row.querySelector(".sh-pg-pick-name");
-          const name = nameEl ? nameEl.textContent.trim() : seed;
-          const latSel = row.querySelector("[data-pg-lat]");
-          const latKey = latSel && latSel.value ? latSel.value : "p95";
-          const b = metricBundle60m(seed + "|" + off, off);
-          if (!labels && (pl.checked || pv.checked || pe.checked || pp.checked)) labels = b.labels;
-          const sty = PG_LINE_STYLES[r % PG_LINE_STYLES.length];
-          if (pl.checked) {
-            latD.push({
-              label: name + " · " + latKey,
-              data: b[latKey],
-              borderColor: sty.color,
-              borderDash: sty.dash,
-              tension: 0.2,
-              pointRadius: 0,
-              borderWidth: 2,
-            });
-          }
-          if (pv.checked) {
-            volD.push({
-              label: name,
-              data: b.vps,
-              borderColor: sty.color,
-              borderDash: sty.dash,
-              tension: 0.2,
-              pointRadius: 0,
-              borderWidth: 2,
-            });
-          }
-          if (pe.checked) {
-            errD.push({
-              label: name,
-              data: b.err,
-              borderColor: sty.color,
-              borderDash: sty.dash,
-              tension: 0.2,
-              pointRadius: 0,
-              borderWidth: 2,
-            });
-          }
-          if (pp.checked) {
-            probD.push({
-              label: name,
-              data: b.probe,
-              borderColor: sty.color,
-              borderDash: sty.dash,
-              tension: 0.2,
-              pointRadius: 0,
-              borderWidth: 2,
-            });
-          }
-        }
-        if (!labels) labels = metricBundle60m("shpg-empty|" + off, off).labels;
-        const legendOpts = { labels: { color: "#8b9cb3", boxWidth: 10 } };
-        const thrKey = "pglat" + thr + String(block.closest(".sh-pg-body") && block.closest(".sh-pg-body").id);
-
-        setPgMetricEmpty(block, "lat", !latD.length);
-        setPgMetricEmpty(block, "vps", !volD.length);
-        setPgMetricEmpty(block, "err", !errD.length);
-        setPgMetricEmpty(block, "probe", !probD.length);
-
-        const noCharts = !latD.length && !volD.length && !errD.length && !probD.length;
-        if (noCharts) {
-          const p = document.createElement("p");
-          p.className = "hint sh-pg-empty-hint";
-          p.style.margin = "0 0 0.75rem";
-          p.textContent = "Check at least one L / V / E / P box for at least one provider.";
-          const grid = block.querySelector(".sh-four-metric-grid");
-          if (grid && grid.parentNode) grid.parentNode.insertBefore(p, grid);
-          return;
-        }
-
-        const latCanvas = block.querySelector('canvas[data-pg-chart="lat"]');
-        if (latD.length && latCanvas) {
-          latCanvas._shChart = new Chart(latCanvas.getContext("2d"), {
-            type: "line",
-            plugins: [thresholdWarnPlugin(thr, thrKey)],
-            data: { labels: labels, datasets: latD },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              interaction: { mode: "index", intersect: false },
-              plugins: { legend: legendOpts },
-              scales: chartAxisOpts(compact, xTitle, "Latency (ms)"),
-            },
-          });
-        }
-        const vCanvas = block.querySelector('canvas[data-pg-chart="vps"]');
-        if (volD.length && vCanvas) {
-          vCanvas._shChart = new Chart(vCanvas.getContext("2d"), {
-            type: "line",
-            data: { labels: labels, datasets: volD },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              interaction: { mode: "index", intersect: false },
-              plugins: { legend: legendOpts },
-              scales: chartAxisOpts(compact, xTitle, "Volume (requests / sec)"),
-            },
-          });
-        }
-        const eCanvas = block.querySelector('canvas[data-pg-chart="err"]');
-        if (errD.length && eCanvas) {
-          eCanvas._shChart = new Chart(eCanvas.getContext("2d"), {
-            type: "line",
-            data: { labels: labels, datasets: errD },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              interaction: { mode: "index", intersect: false },
-              plugins: { legend: legendOpts },
-              scales: chartAxisOpts(compact, xTitle, "Error rate (%)", 0),
-            },
-          });
-        }
-        const prCanvas = block.querySelector('canvas[data-pg-chart="probe"]');
-        if (probD.length && prCanvas) {
-          prCanvas._shChart = new Chart(prCanvas.getContext("2d"), {
-            type: "line",
-            data: { labels: labels, datasets: probD },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              interaction: { mode: "index", intersect: false },
-              plugins: { legend: legendOpts },
-              scales: chartAxisOpts(compact, xTitle, "Rolling probe success (%)", 0, 100),
-            },
-          });
-        }
+        initProviderFourCharts(reg);
+        refreshHealthHero(reg);
       }
-
-      function initPgChartsInBody(body, regionKey) {
-        const block = body.querySelector("[data-pg-charts]");
-        if (!block) return;
-        if (!block.dataset.pgCtrlBound) {
-          block.dataset.pgCtrlBound = "1";
-          block.addEventListener("change", function () {
-            buildPgChartsInBlock(block, getHealthRegion());
-          });
-        }
-        buildPgChartsInBlock(block, regionKey);
-      }
-
-      function thresholdWarnPlugin(thresholdMs, uniqueKey) {
-        const t = Number(thresholdMs) || 3000;
-        const u = String(uniqueKey || "x").replace(/[^a-z0-9]/gi, "");
-        return {
-          id: "shThr" + t + u.slice(0, 24),
-          beforeDatasetsDraw: function (chart) {
-            const yScale = chart.scales.y;
-            if (!chart.chartArea || !yScale) return;
-            if (yScale.max <= t) return;
-            const top = chart.chartArea.top;
-            const left = chart.chartArea.left;
-            const right = chart.chartArea.right;
-            const yPix = yScale.getPixelForValue(t);
-            if (yPix <= top) return;
-            const ctx = chart.ctx;
-            ctx.save();
-            ctx.fillStyle = "rgba(245, 158, 11, 0.14)";
-            ctx.fillRect(left, top, right - left, yPix - top);
-            ctx.strokeStyle = "rgba(245, 158, 11, 0.45)";
-            ctx.lineWidth = 1;
-            ctx.setLineDash([6, 4]);
-            ctx.beginPath();
-            ctx.moveTo(left, yPix);
-            ctx.lineTo(right, yPix);
-            ctx.stroke();
-            ctx.restore();
-          },
-        };
-      }
-
-      function bindProviderObservability() {
-        if (bindProviderObservability._done) return;
-        bindProviderObservability._done = true;
-        document.querySelectorAll(".sh-pg-toggle").forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            const exp = btn.getAttribute("aria-expanded") === "true";
-            const bodyId = btn.getAttribute("aria-controls");
-            const body = bodyId ? el(bodyId) : null;
-            btn.setAttribute("aria-expanded", String(!exp));
-            if (body) body.hidden = exp;
-            if (!exp) {
-              setTimeout(function () {
-                initPgChartsInBody(body, getHealthRegion());
-              }, 0);
-            }
-          });
-        });
+      function shStartHealthLiveTick() {
+        shStopHealthLiveTick();
+        shHealthDataTimer = setInterval(refreshHealthChartsForLiveData, 2500);
       }
 
       function initHealthDashboard() {
@@ -3779,10 +4088,124 @@
         renderHealthSparklines();
         const reg = getHealthRegion();
         initComponentFourCharts(reg);
+        initProviderFourCharts(reg);
         refreshHealthHero(reg);
-        document.querySelectorAll(".sh-pg-body").forEach(function (body) {
-          if (!body.hidden) initPgChartsInBody(body, reg);
+        shStartHealthLiveTick();
+      }
+
+      var SH_CUST_ERROR_ENDPOINTS = {
+        C1: {
+          title: "C1 — Initial Message API",
+          lead:
+            "Customer-configured URLs that are currently over the demo error-rate threshold for this component (rolling 5 minutes).",
+          rows: [],
+        },
+        C2: {
+          title: "C2 — Tool Calling API(s)",
+          lead: "Tool HTTP callbacks with elevated 4xx/5xx or timeout-equivalent failures in the current window (demo).",
+          rows: [
+            {
+              api: "https://hooks.customer.inya.ai/v1/tools/sku-lookup",
+              bot: "La Casa Support",
+              err: "1.4%",
+              lat: "890 ms",
+              circuit: "closed",
+            },
+          ],
+        },
+        C3: {
+          title: "C3 — Post-call Webhook",
+          lead: "Webhook targets with delivery failures, retries exhausted, or breaker-open state in the current window (demo).",
+          rows: [
+            {
+              api: "https://partner.acme.com/api/v2/call-complete",
+              bot: "Acme Retail Bot",
+              err: "8.2%",
+              lat: "2.1 s",
+              circuit: "open",
+            },
+            {
+              api: "https://crm.wayline.io/ingest/voice-summary",
+              bot: "Wayline Field Sales",
+              err: "5.1%",
+              lat: "1.4 s",
+              circuit: "closed",
+            },
+            {
+              api: "https://hooks.slack.com/services/T9B99/CALLBACK/mirror",
+              bot: "Internal Slack mirror",
+              err: "12.0%",
+              lat: "620 ms",
+              circuit: "open",
+            },
+          ],
+        },
+      };
+
+      function openCustEndpointErrorModal(compId) {
+        const dlg = el("sh-cust-endpoints-dialog");
+        const meta = SH_CUST_ERROR_ENDPOINTS[compId];
+        if (!dlg || !meta) return;
+        const titleEl = el("sh-cust-dialog-title");
+        const leadEl = el("sh-cust-dialog-lead");
+        const tbody = el("sh-cust-dialog-tbody");
+        const wrap = el("sh-cust-dialog-table-wrap");
+        const emptyP = el("sh-cust-dialog-empty");
+        if (!titleEl || !leadEl || !tbody || !wrap || !emptyP) return;
+        titleEl.textContent = meta.title;
+        leadEl.textContent = meta.lead;
+        tbody.innerHTML = "";
+        if (!meta.rows || !meta.rows.length) {
+          wrap.classList.add("hidden");
+          emptyP.textContent =
+            "No customer URLs are currently above the demo error threshold for this component.";
+          emptyP.classList.remove("hidden");
+        } else {
+          emptyP.classList.add("hidden");
+          wrap.classList.remove("hidden");
+          meta.rows.forEach(function (r) {
+            const tr = document.createElement("tr");
+            [["api"], ["bot"], ["err"], ["lat"]].forEach(function (keys) {
+              const td = document.createElement("td");
+              td.textContent = r[keys[0]];
+              tr.appendChild(td);
+            });
+            const tdC = document.createElement("td");
+            const open = r.circuit === "open";
+            tdC.textContent = open ? "Open" : "Closed";
+            tdC.className = open ? "sh-cust-circuit-open" : "sh-cust-circuit-closed";
+            tr.appendChild(tdC);
+            tbody.appendChild(tr);
+          });
+        }
+        if (typeof dlg.showModal === "function") {
+          dlg.showModal();
+        }
+      }
+
+      function bindCustEndpointModal() {
+        if (bindCustEndpointModal._done) return;
+        bindCustEndpointModal._done = true;
+        document.addEventListener("click", function (ev) {
+          const btn = ev.target.closest("[data-cust-error-modal]");
+          if (!btn) return;
+          const vh = el("view-health");
+          if (!vh || !vh.contains(btn)) return;
+          ev.preventDefault();
+          openCustEndpointErrorModal(btn.getAttribute("data-cust-error-modal"));
         });
+        const dlg = el("sh-cust-endpoints-dialog");
+        const closeBtn = el("sh-cust-dialog-close");
+        if (closeBtn && dlg) {
+          closeBtn.addEventListener("click", function () {
+            dlg.close();
+          });
+        }
+        if (dlg) {
+          dlg.addEventListener("click", function (ev) {
+            if (ev.target === dlg) dlg.close();
+          });
+        }
       }
 
       function bindHealthUi() {
@@ -3798,16 +4221,14 @@
             destroyAllHealthDashboardCharts();
             initComponentFourCharts(r);
             refreshHealthHero(r);
-            document.querySelectorAll(".sh-pg-body").forEach(function (body) {
-              if (!body.hidden) initPgChartsInBody(body, r);
-            });
+            initProviderFourCharts(r);
             const fresh = el("sh-data-freshness");
             if (fresh) {
               fresh.textContent = "Region: " + btn.textContent.trim() + " · ≤60s skew (demo)";
             }
           });
         });
-        bindProviderObservability();
+        bindCustEndpointModal();
         if (!bindHealthUi._chartToggle) {
           bindHealthUi._chartToggle = true;
           document.addEventListener("click", function (ev) {
@@ -3824,7 +4245,11 @@
             tr.hidden = open;
             const icon = btn.querySelector(".sh-comp-toggle-icon");
             if (icon) icon.textContent = open ? "▸" : "▾";
-            btn.setAttribute("title", open ? "Show metrics charts" : "Hide metrics charts");
+            var isPvAgg = tid && tid.indexOf("sh-pv-agg-") === 0;
+            btn.setAttribute(
+              "title",
+              open ? (isPvAgg ? "Show provider table" : "Show metrics charts") : isPvAgg ? "Hide provider table" : "Hide metrics charts"
+            );
             if (!open) {
               tr.querySelectorAll("canvas").forEach(function (cv) {
                 if (cv._shChart) {
